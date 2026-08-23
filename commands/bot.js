@@ -1,5 +1,4 @@
 // commands/bot.js
-// commands/bot.js
 const axios = require("axios");
 
 const greetings = [
@@ -70,30 +69,42 @@ module.exports = {
       const chatId = m.chat;
       const sender = m.sender || m.key.participant;
 
-      // ১. রিপ্লাই ডিটেক্ট করার জন্য গভীর থেকে অবজেক্ট চেক (Baileys compatible)
-      const contextInfo = m.message?.extendedTextMessage?.contextInfo || m.quoted;
-      const isReplyToBot = contextInfo && (
-        contextInfo.participant || 
-        contextInfo.stanzaId || 
-        contextInfo.quotedMessage
-      );
+      // ১. বটের নিজস্ব ওয়াটসঅ্যাপ নম্বর নিখুঁতভাবে বের করা
+      const botNum = (bad.user?.id || bad.user?.jid || "").split(':')[0].split('@')[0];
+
+      // ২. রিপ্লাই দেওয়া মেসেজের তথ্য নেওয়া
+      const quotedMsg = m.quoted || (m.message && m.message.extendedTextMessage && m.message.extendedTextMessage.contextInfo);
+      
+      let isReplyToBot = false;
+      if (quotedMsg && botNum) {
+        const quotedSender = (quotedMsg.participant || quotedMsg.sender || quotedMsg.key?.participant || "").split('@')[0];
+        // রিপ্লাইকৃত মেসেজটি বটের নিজস্ব কি না তা যাচাই
+        if (quotedSender === botNum || quotedMsg.fromMe === true) {
+          isReplyToBot = true;
+        }
+      }
 
       const startsWithTrigger = text.startsWith("bot ") || text.startsWith("বট ");
 
-      // ২. বটের মেসেজে রিপ্লাই দিলে অথবা 'bot [মেসেজ]' বললে AI উত্তর দেবে
-      if (isReplyToBot && text !== "bot" && text !== "বট") {
+      // ৩. শুধুমাত্র বটের মেসেজে রিপ্লাই দিলে বা 'bot [কথা]' লিখলে AI উত্তর দেবে
+      if (isReplyToBot || startsWithTrigger) {
+        let queryText = m.text;
+        if (startsWithTrigger) {
+          queryText = m.text.replace(/^(bot|বট)\s+/i, "");
+        }
+
         const apis = await axios.get("https://raw.githubusercontent.com/MOHAMMAD-NAYAN-OFFICIAL/Nayan/main/api.json");
         const apiss = apis.data.api;
 
         const response = await axios.get(
-          `${apiss}/sim?type=ask&ask=${encodeURIComponent(m.text)}&number=${sender.split('@')[0]}`
+          `${apiss}/sim?type=ask&ask=${encodeURIComponent(queryText)}&number=${sender.split('@')[0]}`
         );
 
         const replyText = response.data?.data?.msg || "🤖 বুঝতে পারিনি!";
         return await bad.sendMessage(chatId, { text: replyText }, { quoted: m });
       }
 
-      // ৩. শুধু 'bot' বা 'বট' লিখলে র্যান্ডম গ্রিটিং দেবে
+      // ৪. শুধু 'bot' বা 'বট' লিখলে র্যান্ডম গ্রিটিং দেবে
       const singleTriggers = ["bot", "বট", "jan", "জান", "sona", "সোনা"];
       if (singleTriggers.includes(text)) {
         const randomGreeting = greetings[Math.floor(Math.random() * greetings.length)];
