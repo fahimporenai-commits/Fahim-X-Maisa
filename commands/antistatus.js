@@ -1,4 +1,4 @@
-// commands/antistatus.js
+// commands/antistatus.js fahim
 
 // AntiStatus মোড এবং ওয়ার্নিং সেভ রাখার অবজেক্ট
 global.antiStatusMode = global.antiStatusMode || {}; // 'delete', 'kick', 'off'
