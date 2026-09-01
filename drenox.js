@@ -13168,7 +13168,7 @@ module.exports.setupEventListeners = function(bad, store) {
         }
     });
          
-}:
+
 
 
 
