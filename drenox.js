@@ -6433,19 +6433,72 @@ case 'song': {
     const video = search.videos[0]
 
     // 2️⃣ API Call
-    const api = `https://api.ootaizumi.web.id/downloader/youtube`
-    const { data } = await axios.get(api, {
-      params: {
-        url: video.url,
-        format: 'mp3'
-      }
-    })
+    // 2️⃣ SaveTube API — replace your old API block with this
+const crypto = require('crypto')
 
-    if (!data.status || !data.result?.download) {
-      throw new Error('Download failed')
-    }
+const cdn = (await axios.get(
+  'https://media.savetube.vip/api/random-cdn',
+  { timeout: 30000 }
+)).data.cdn
 
-    const result = data.result
+const headers = {
+  'Content-Type': 'application/json',
+  'User-Agent': 'Mozilla/5.0',
+  'Referer': 'https://save-tube.com/'
+}
+
+const infoResponse = await axios.post(
+  `https://${cdn}/v2/info`,
+  { url: video.url },
+  { headers, timeout: 60000 }
+)
+
+const encrypted = Buffer.from(infoResponse.data.data, 'base64')
+const iv = encrypted.subarray(0, 16)
+const content = encrypted.subarray(16)
+const secretKey = Buffer.from(
+  'C5D58EF67A7584E4A29F6C35BBC4EB12',
+  'hex'
+)
+
+const decipher = crypto.createDecipheriv(
+  'aes-128-cbc',
+  secretKey,
+  iv
+)
+
+const info = JSON.parse(
+  Buffer.concat([
+    decipher.update(content),
+    decipher.final()
+  ]).toString()
+)
+
+const downloadResponse = await axios.post(
+  `https://${cdn}/download`,
+  {
+    downloadType: 'audio',
+    quality: '128',
+    key: info.key
+  },
+  { headers, timeout: 120000 }
+)
+
+const downloadUrl = downloadResponse.data?.data?.downloadUrl
+
+if (!downloadResponse.data?.status || !downloadUrl) {
+  throw new Error('SaveTube download URL not found')
+}
+
+// আপনার নিচের old code যাতে একইভাবে কাজ করে, সেই format বানানো হলো
+const result = {
+  title: info.title || video.title,
+  download: downloadUrl,
+  thumbnail: video.thumbnail,
+  author: {
+    channelTitle: video.author?.name || 'YouTube Audio'
+  }
+}
 
     // 3️⃣ Send Audio
     await bad.sendMessage(
