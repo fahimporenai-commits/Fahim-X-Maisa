@@ -3251,7 +3251,7 @@ case 'welcome': {
         reply('USAGE: .welcome on / .welcome off');
     }
 }
-break;
+break
 
 case 'goodbye': {
     if (!m.isGroup) return reply('GROUP ONLY.');
@@ -3271,7 +3271,7 @@ case 'goodbye': {
         reply('USAGE: .goodbye on / .goodbye off');
     }
 }
-break;
+break
 
 case 'runtime':
 case 'alive': {
