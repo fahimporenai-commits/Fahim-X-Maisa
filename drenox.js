@@ -3234,39 +3234,45 @@ break
       // WELCOME COMMAND
       // ═══════════════════════════════════════
 case 'welcome': {
-    if (!m.isGroup) return reply('ɢʀᴏᴜᴘ ᴏɴʟʏ.')
-    if (!isAdmins && !isCreator) return reply('ᴀᴅᴍɪɴs ᴏɴʟʏ.')
-    if (!args[0]) return reply('ᴜsᴀɢᴇ: ᴡᴇʟᴄᴏᴍᴇ ᴏɴ/ᴏғғ')
+    if (!m.isGroup) return reply('GROUP ONLY.');
+    if (!isAdmins && !isCreator) return reply('ADMINS ONLY.');
     
-    if (args[0].toLowerCase() === 'on') {
+    const textArg = args.join(" ").trim().toLowerCase();
+
+    if (!textArg) return reply('USAGE: .welcome on / .welcome off');
+
+    if (textArg.includes('on') || textArg === '1') {
         setSetting(m.chat, "welcome", true);
-        m.reply('✅ ᴡᴇʟᴄᴏᴍᴇ ᴍᴇssᴀɢᴇs ᴇɴᴀʙʟᴇᴅ!')
-    } else if (args[0].toLowerCase() === 'off') {
+        reply('✅ WELCOME MESSAGES ENABLED!');
+    } else if (textArg.includes('off') || textArg === '0') {
         setSetting(m.chat, "welcome", false);
-        m.reply('❌ ᴡᴇʟᴄᴏᴍᴇ ᴍᴇssᴀɢᴇs ᴅɪsᴀʙʟᴇᴅ!')
+        reply('❌ WELCOME MESSAGES DISABLED!');
     } else {
-        reply('ᴜsᴀɢᴇ: ᴡᴇʟᴄᴏᴍᴇ ᴏɴ/ᴏғғ')
+        reply('USAGE: .welcome on / .welcome off');
     }
 }
-break
+break;
 
 case 'goodbye': {
-    if (!m.isGroup) return reply('ɢʀᴏᴜᴘ ᴏɴʟʏ.')
-    if (!isAdmins && !isCreator) return reply('ᴀᴅᴍɪɴs ᴏɴʟʏ.')
-    if (!args[0]) return reply('ᴜsᴀɢᴇ: ɢᴏᴏᴅʙʏᴇ ᴏɴ/ᴏғғ')
+    if (!m.isGroup) return reply('GROUP ONLY.');
+    if (!isAdmins && !isCreator) return reply('ADMINS ONLY.');
     
-    if (args[0].toLowerCase() === 'on') {
+    const textArg = args.join(" ").trim().toLowerCase();
+
+    if (!textArg) return reply('USAGE: .goodbye on / .goodbye off');
+
+    if (textArg.includes('on') || textArg === '1') {
         setSetting(m.chat, "goodbye", true);
-        m.reply('✅ ɢᴏᴏᴅʙʏᴇ ᴍᴇssᴀɢᴇs ᴇɴᴀʙʟᴇᴅ!')
-    } else if (args[0].toLowerCase() === 'off') {
+        reply('✅ GOODBYE MESSAGES ENABLED!');
+    } else if (textArg.includes('off') || textArg === '0') {
         setSetting(m.chat, "goodbye", false);
-        m.reply('❌ ɢᴏᴏᴅʙʏᴇ ᴍᴇssᴀɢᴇs ᴅɪsᴀʙʟᴇᴅ!')
+        reply('❌ GOODBYE MESSAGES DISABLED!');
     } else {
-        reply('ᴜsᴀɢᴇ: ɢᴏᴏᴅʙʏᴇ ᴏɴ/ᴏғғ')
+        reply('USAGE: .goodbye on / .goodbye off');
     }
 }
-break
-  
+break;
+
 case 'runtime':
 case 'alive': {
   const uptime = runtime(process.uptime());
