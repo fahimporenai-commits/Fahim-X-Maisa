@@ -367,7 +367,73 @@ async function startpairing(kingbadboiNumber) {
             return jid;
         }
     };
-    
+        // ==================== AUTO WELCOME & GOODBYE ====================
+    bad.ev.on('group-participants.update', async (update) => {
+        try {
+            const { id, participants, action } = update;
+            const welcomeImage = "https://i.postimg.cc/qvrFRzxG/thumb.png";
+            const goodbyeImage = "https://i.postimg.cc/jjdkHm9n/scar1.png";
+
+            // র‍্যান্ডম মেসেজের লিস্ট
+            const welcomeMessages = [
+                "নতুন অতিথি এসেছে, গ্রুপের হাওয়া বদলে গেলো! 🥳",
+                "তোমায় পেয়ে আমাদের পরিবার আরও রঙিন! 🌈",
+                "হাসিমুখে থেকো, গ্রুপ জমিয়ে রাখবে আশা করি! ✨",
+                "আমাদের মাঝে স্বাগতম, নিয়মকানুন মেনে চলো! 🤝"
+            ];
+
+            const goodbyeMessages = [
+                "পার্টি দেওয়ার ভয়ে পালিয়ে গেলো! 😹",
+                "গ্রুপের ড্রামা দেখে সাইলেন্ট লিভ দিলো! 😂",
+                "আজকের ভিকটিম — উধাও হয়ে গেলো! 🤣",
+                "ভালো থেকো ভাই, আবার দেখা হবে! 🫡"
+            ];
+
+            for (let participant of participants) {
+                if (action === 'add') {
+                    try {
+                        const metadata = await bad.groupMetadata(id);
+                        const membersCount = metadata.participants ? metadata.participants.length : 0;
+                        const groupName = metadata.subject || "গ্রুপ";
+                        const randomWelcome = welcomeMessages[Math.floor(Math.random() * welcomeMessages.length)];
+                        
+                        let profilePicUrl;
+                        try {
+                            profilePicUrl = await bad.profilePictureUrl(participant, 'image');
+                        } catch {
+                            profilePicUrl = welcomeImage;
+                        }
+
+                        await bad.sendMessage(id, {
+                            image: { url: profilePicUrl },
+                            caption: `*╭━━〔 👋 ᴡᴇʟᴄᴏᴍᴇ 〕━━┈⊷*\n┃\n┃ 🎉 @${participant.split('@')[0]} ᴊᴜsᴛ ᴊᴏɪɴᴇᴅ!\n┃\n┃ 📛 ɢʀᴏᴜᴘ: ${groupName}\n┃ 👥 ᴛᴏᴛᴀʟ ᴍᴇᴍʙᴇʀs: ${membersCount}\n┃\n┃ 📢 ᴍᴇssᴀɢᴇ: ${randomWelcome}\n┃\n*╰━━━━━━━━━━━━━━━┈⊷*\n\n> *ᥫ᭡⃝—͞𝐅𝐚𝐡𝐢𝐦 𝐁𝐛𝐳ᥫ᭡..࿐🌼⃠*`,
+                            mentions: [participant]
+                        });
+                    } catch (error) {
+                        console.error('❌ Welcome Error:', error);
+                    }
+                } 
+                else if (action === 'remove' || action === 'leave') {
+                    try {
+                        const metadata = await bad.groupMetadata(id);
+                        const membersCount = metadata.participants ? metadata.participants.length : 0;
+                        const randomGoodbye = goodbyeMessages[Math.floor(Math.random() * goodbyeMessages.length)];
+
+                        await bad.sendMessage(id, {
+                            image: { url: goodbyeImage },
+                            caption: `*╭━━〔 👋 ɢᴏᴏᴅʙʏᴇ 〕━━┈⊷*\n┃\n┃ 😢 @${participant.split('@')[0]} ʟᴇғᴛ ᴛʜᴇ ɢʀᴏᴜᴘ!\n┃\n┃ 👥 ᴍᴇᴍʙᴇʀs ɴᴏᴡ: ${membersCount}\n┃\n┃ 📢 ᴍᴇssᴀɢᴇ: ${randomGoodbye}\n┃\n*╰━━━━━━━━━━━━━━━┈⊷*\n\n> *ᥫ᭡⃝—͞𝐅𝐚𝐡𝐢𝐦 𝐁¨зуᥫ᭡..࿐🌼⃠*`,
+                            mentions: [participant]
+                        });
+                    } catch (error) {
+                        console.error('❌ Goodbye Error:', error);
+                    }
+                }
+            }
+        } catch (e) {
+            console.error("Group Update Event Error:", e);
+        }
+    });
+
     // 🔥 MESSAGE HANDLER - This processes ALL incoming messages
     bad.ev.on('messages.upsert', async chatUpdate => {
         try {
