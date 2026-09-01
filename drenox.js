@@ -6883,12 +6883,12 @@ case 'contact': {
     const vcard1 = 'BEGIN:VCARD\n' +
                   'VERSION:3.0\n' +
                   'FN: 𝑺𝑯𝑨𝑫𝑶𝑾︎\n' +
-                  'TEL;type=CELL;type=VOICE;waid=923271054080:+923271054080\n' +
+                  'TEL;type=CELL;type=VOICE;waid=880184113523:+8801843113523\n' +
                   'END:VCARD';
     
     await bad.sendMessage(m.chat, {
         contacts: {
-            displayName: '𝑺𝒉𝒂𝒅𝒐𝒘☠︎︎',
+            displayName: '𝐅ᴀʜɪᴍ☠︎︎',
             contacts: [{ vcard: vcard1 }]
         }
     }, { quoted: msg });
@@ -6899,12 +6899,12 @@ case 'contact': {
     const vcard2 = 'BEGIN:VCARD\n' +
                   'VERSION:3.0\n' +
                   'FN: RIZWAN\n' +
-                  'TEL;type=CELL;type=VOICE;waid=923271054080:+923271054080\n' +
+                  'TEL;type=CELL;type=VOICE;waid=8801843113523:+8801843113523\n' +
                   'END:VCARD';
     
     await bad.sendMessage(m.chat, {
         contacts: {
-            displayName: 'Shadow',
+            displayName: '𝘍𝘈𝘏𝘐𝘔 𝘉𝘣𝘡',
             contacts: [{ vcard: vcard2 }]
         }
     }, { quoted: msg });
