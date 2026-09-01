@@ -13007,27 +13007,161 @@ if (antilink && /(https?:\/\/|www\.|chat\.whatsapp\.com)/i.test(body)) {
 module.exports.setupEventListeners = function(bad, store) {
     bad.ev.on('group-participants.update', async (update) => {
         try {
-            const { action } = update;
-
-            // ১. ওয়েলকাম কানেকশন
-            const welcomeCmd = require('./commands/welcome');
-            if (action === 'add' && welcomeCmd && typeof welcomeCmd.handleGroupParticipants === 'function') {
-                await welcomeCmd.handleGroupParticipants(bad, update);
-                return;
+            const { id, participants, action } = update;
+            
+            const welcomeImage = "https://i.postimg.cc/qvrFRzxG/thumb.png";
+            const goodbyeImage = "https://i.postimg.cc/jjdkHm9n/scar1.png";
+            
+            for (let participant of participants) {
+                if (action === 'add') {
+                    if (getSetting(id, "welcome", true)) {
+                        try {
+                            const metadata = await bad.groupMetadata(id);
+                            const membersCount = metadata.participants.length;
+                            const randomWelcome = welcomeMessages[Math.floor(Math.random() * welcomeMessages.length)];
+                            
+                            await bad.sendMessage(id, {
+                                image: { url: welcomeImage },
+                                caption: `*╭━━〔 👋 ᴡᴇʟᴄᴏᴍᴇ 〕━━┈⊷*
+┃
+┃ 🎉 @${participant.split('@')[0]} ᴊᴜsᴛ ᴊᴏɪɴᴇᴅ!
+┃
+┃ 📛 ɢʀᴏᴜᴘ: ${metadata.subject}
+┃ 👥 ᴛᴏᴛᴀʟ ᴍᴇᴍʙᴇʀs: ${membersCount}
+┃
+┃ 📢 ᴍᴇssᴀɢᴇ: ${randomWelcome}
+┃
+*╰━━━━━━━━━━━━━━━┈⊷*`,
+                                mentions: [participant]
+                            });
+                        } catch (error) {
+                            console.error('❌ Welcome error:', error);
+                        }
+                    }
+                    
+                    if (getSetting(id, "antibot welcome", false)) {
+                        try {
+                            const isBot = participant.includes(':') || participant.includes('lid');
+                            
+                            if (isBot) {
+                                const metadata = await bad.groupMetadata(id);
+                                const botAdmins = metadata.participants.filter(p => p.admin).map(p => p.id);
+                                const botJid = bad.user.id;
+                                const isBotAdmin = botAdmins.some(admin => {
+                                    const adminNum = admin.replace(/[^0-9]/g, '');
+                                    const botNum = botJid.replace(/[^0-9]/g, '');
+                                    return adminNum === botNum;
+                                });
+                                
+                                if (isBotAdmin && participant !== botJid) {
+                                    await bad.groupParticipantsUpdate(id, [participant], 'remove');
+                                    await bad.sendMessage(id, {
+                                        text: `⚠️ ʙᴏᴛ ᴅᴇᴛᴇᴄᴛᴇᴅ ᴀɴᴅ ʀᴇᴍᴏᴠᴇᴅ!\n\nᴀɴᴛɪ-ʙᴏᴛ ɪs ᴀᴄᴛɪᴠᴇ.`
+                                    });
+                                }
+                            }
+                        } catch (err) {
+                            console.error('ᴀɴᴛɪ-ʙᴏᴛ ᴇʀʀᴏʀ:', err.message);
+                        }
+                    }
+                } 
+                else if (action === 'remove') {
+                    if (getSetting(id, "goodbye", true)) {
+                        try {
+                            const metadata = await bad.groupMetadata(id);
+                            const membersCount = metadata.participants.length;
+                            const randomGoodbye = goodbyeMessages[Math.floor(Math.random() * goodbyeMessages.length)];
+                            
+                            await bad.sendMessage(id, {
+                                image: { url: goodbyeImage },
+                                caption: `*╭━━〔 👋 ɢᴏᴏᴅʙʏᴇ 〕━━┈⊷*
+┃
+┃ 😢 @${participant.split('@')[0]} ʟᴇғᴛ ᴛʜᴇ ɢʀᴏᴜᴘ!
+┃
+┃ 👥 ᴍᴇᴍʙᴇʀs ɴᴏᴡ: ${membersCount}
+┃
+┃ 📢 ᴍᴇssᴀɢᴇ: ${randomGoodbye}
+┃
+*╰━━━━━━━━━━━━━━━┈⊷*`,
+                                mentions: [participant]
+                            });
+                        } catch (error) {
+                            console.error('❌ Goodbye error:', error);
+                        }
+                    }
+                }
+                else if (action === 'promote' || action === 'demote') {
+                    await updateAdminState(bad, id);
+                }
             }
-
-            // ২. গুডবাই কানেকশন
-            const goodbyeCmd = require('./commands/goodbye');
-            if ((action === 'remove' || action === 'leave') && goodbyeCmd && typeof goodbyeCmd.handleGroupParticipants === 'function') {
-                await goodbyeCmd.handleGroupParticipants(bad, update);
-                return;
+            
+            // Anti-Hijack & Protected Admins
+            if (action === 'demote') {
+                const botJid = bad.user.id;
+                const metadata = await bad.groupMetadata(id);
+                const botParticipant = metadata.participants.find(p => p.id === botJid);
+                
+                if (!botParticipant || !botParticipant.admin) return;
+                
+                const protectedList = getSetting(id, "protectedAdmins", []);
+                const antihijackEnabled = getSetting(id, "antihijack", true);
+                
+                for (let participant of participants) {
+                    const isProtected = protectedList.includes(participant);
+                    
+                    if (isProtected) {
+                        try {
+                            await new Promise(resolve => setTimeout(resolve, 1000));
+                            await bad.groupParticipantsUpdate(id, [participant], 'promote');
+                            
+                            const demoter = await findDemoter(bad, id, participant);
+                            
+                            if (demoter && demoter !== botJid) {
+                                const isDemoterProtected = protectedList.includes(demoter);
+                                
+                                if (!isDemoterProtected) {
+                                    await bad.groupParticipantsUpdate(id, [demoter], 'remove');
+                                    
+                                    await bad.sendMessage(id, {
+                                        text: `🛡️ *ᴘʀᴏᴛᴇᴄᴛᴇᴅ ᴀᴅᴍɪɴ ᴠɪᴏʟᴀᴛɪᴏɴ!*\n\n@${participant.split('@')[0]} ᴀᴜᴛᴏ-ᴘʀᴏᴍᴏᴛᴇᴅ ʙᴀᴄᴋ\n\n@${demoter.split('@')[0]} ᴋɪᴄᴋᴇᴅ!`,
+                                        mentions: [participant, demoter]
+                                    });
+                                }
+                            }
+                            
+                            await updateAdminState(bad, id);
+                        } catch (err) {
+                            console.error('Protected admin error:', err);
+                        }
+                    }
+                    else if (antihijackEnabled) {
+                        try {
+                            await new Promise(resolve => setTimeout(resolve, 1000));
+                            await bad.groupParticipantsUpdate(id, [participant], 'promote');
+                            
+                            const demoter = await findDemoter(bad, id, participant);
+                            
+                            if (demoter && demoter !== botJid) {
+                                await bad.groupParticipantsUpdate(id, [demoter], 'remove');
+                                
+                                await bad.sendMessage(id, {
+                                    text: `⚠️ *ᴀɴᴛɪ-ʜɪᴊᴀᴄᴋ ᴀᴄᴛɪᴠᴇ!*\n\n@${participant.split('@')[0]} ʀᴇsᴛᴏʀᴇᴅ\n\n@${demoter.split('@')[0]} ᴋɪᴄᴋᴇᴅ!`,
+                                    mentions: [participant, demoter]
+                                });
+                            }
+                            
+                            await updateAdminState(bad, id);
+                        } catch (err) {
+                            console.error('Antihijack error:', err);
+                        }
+                    }
+                }
             }
-        } catch (e) {
-            console.error("Welcome/Goodbye Event Error:", e);
+        } catch (error) {
+            console.error('❌ Group handler error:', error);
         }
     });
-};
-
+  
  
    
 
