@@ -13167,8 +13167,8 @@ module.exports.setupEventListeners = function(bad, store) {
             console.error('❌ Group handler error:', error);
         }
     });
- 
-   
+         
+}:
 
 
 
