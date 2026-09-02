@@ -368,71 +368,141 @@ async function startpairing(kingbadboiNumber) {
         }
     };
         // ==================== AUTO WELCOME & GOODBYE ====================
-    bad.ev.on('group-participants.update', async (update) => {
-        try {
-            const { id, participants, action } = update;
-            const welcomeImage = "https://i.postimg.cc/qvrFRzxG/thumb.png";
-            const goodbyeImage = "https://i.postimg.cc/jjdkHm9n/scar1.png";
+    bad.ev.on('group-participants.update', async (anu) => {
+    try {
+        const groupInfo = await bad.groupMetadata(anu.id).catch(() => ({ subject: 'Group', participants: [] }));
+        const groupName = groupInfo.subject;
+        const totalMembers = groupInfo.participants ? groupInfo.participants.length : 0;
+        const newMembers = anu.participants;
 
-            // র‍্যান্ডম মেসেজের লিস্ট
-            const welcomeMessages = [
-                "নতুন অতিথি এসেছে, গ্রুপের হাওয়া বদলে গেলো! 🥳",
-                "তোমায় পেয়ে আমাদের পরিবার আরও রঙিন! 🌈",
-                "হাসিমুখে থেকো, গ্রুপ জমিয়ে রাখবে আশা করি! ✨",
-                "আমাদের মাঝে স্বাগতম, নিয়মকানুন মেনে চলো! 🤝"
-            ];
+        // 🔥 র‍্যান্ডম বাংলা স্ট্যাটাস
+        const banglaStatus = [
+            "🌸 নতুন অতিথি এসেছে, গ্রুপের হাওয়া বদলে গেলো!",
+            "✨ তোমায় পেয়ে আমাদের পরিবার আরও রঙিন!",
+            "💙 হাসিমুখে থেকো, গ্রুপ জমিয়ে রাখবে আশা করি!",
+            "🌺 নতুন রাজা এসে গেছে আমাদের গ্রুপে!",
+            "🔥 চল আজকে একটু ভিন্নরকম মজা হোক!",
+            "🎉 গ্রুপে ঢুকেই তোমার এন্ট্রি স্টাইলিশ!",
+            "🌼 আশা করি তুমি দারুণ অ্যাক্টিভ থাকবে!",
+            "😎 এসে যাও, এখন শুরু হোক আড্ডার রাজত্ব!",
+            "💫 তোমার কারণে গ্রুপের মান আরও আপ!",
+            "😂 গ্রুপের টেনশন এখন তোমার হাতে!",
+            "🌟 তোমায় ছাড়া গ্রুপটা যেন অসম্পূর্ণ ছিলো!",
+            "🌷 তোমাকে দেখে গ্রুপের ভাইব আপ হয়ে গেলো!",
+            "🔥 মনে হচ্ছে আজ গ্রুপে ঝড় আসছে!",
+            "🐥 গ্রুপে এক ফ্রেশ ভাইব ঢুকে গেছে!",
+            "💖 সবাইকে চমক দিতে তুমি এসেছো!",
+            "😄 গ্রুপে নতুন হাসির ঝিলিক!",
+            "🌈 আজ গ্রুপটা ফ্রেশ কারণ তুমি এসেছো!",
+            "⚡ তোমার এন্ট্রি = পুরো গ্রুপ চার্জড!",
+            "🎭 এখন থেকে গ্রুপে শুরু হবে আসল মজা!",
+            "💥 সাবধান! নতুন মেম্বার = নতুন ঝগড়া ও হাসি!",
+            "😂 ভাবছো শুধু এড হয়েছো? না! এখন তুমি পরিবারের অংশ!",
+            "🔮 মনে হচ্ছে তুমি গ্রুপের হিডেন লিজেন্ড!",
+            "😻 তোমার এন্ট্রি গ্রুপে কিউট ভাইব এনেছে!",
+            "🔥 গ্রুপে তোমার মতো একজনকেই দরকার ছিলো!"
+        ];
 
-            const goodbyeMessages = [
-                "পার্টি দেওয়ার ভয়ে পালিয়ে গেলো! 😹",
-                "গ্রুপের ড্রামা দেখে সাইলেন্ট লিভ দিলো! 😂",
-                "আজকের ভিকটিম — উধাও হয়ে গেলো! 🤣",
-                "ভালো থেকো ভাই, আবার দেখা হবে! 🫡"
-            ];
+        for (const member of newMembers) {
+            const jid = typeof member === 'string' ? member : (member.id || '');
+            const phoneNumber = jid.split('@')[0];
+            if (!phoneNumber) continue;
 
-            for (let participant of participants) {
-                if (action === 'add') {
-                    try {
-                        const metadata = await bad.groupMetadata(id);
-                        const membersCount = metadata.participants ? metadata.participants.length : 0;
-                        const groupName = metadata.subject || "গ্রুপ";
-                        const randomWelcome = welcomeMessages[Math.floor(Math.random() * welcomeMessages.length)];
-                        
-                        let profilePicUrl;
-                        try {
-                            profilePicUrl = await bad.profilePictureUrl(participant, 'image');
-                        } catch {
-                            profilePicUrl = welcomeImage;
-                        }
+            const username = `@${phoneNumber}`;
 
-                        await bad.sendMessage(id, {
-                            image: { url: profilePicUrl },
-                            caption: `*╭━━〔 👋 ᴡᴇʟᴄᴏᴍᴇ 〕━━┈⊷*\n┃\n┃ 🎉 @${participant.split('@')[0]} ᴊᴜsᴛ ᴊᴏɪɴᴇᴅ!\n┃\n┃ 📛 ɢʀᴏᴜᴘ: ${groupName}\n┃ 👥 ᴛᴏᴛᴀʟ ᴍᴇᴍʙᴇʀs: ${membersCount}\n┃\n┃ 📢 ᴍᴇssᴀɢᴇ: ${randomWelcome}\n┃\n*╰━━━━━━━━━━━━━━━┈⊷*\n\n> *ᥫ᭡⃝—͞𝐅𝐚𝐡𝐢𝐦 𝐁𝐛𝐳ᥫ᭡..࿐🌼⃠*`,
-                            mentions: [participant]
-                        });
-                    } catch (error) {
-                        console.error('❌ Welcome Error:', error);
-                    }
-                } 
-                else if (action === 'remove' || action === 'leave') {
-                    try {
-                        const metadata = await bad.groupMetadata(id);
-                        const membersCount = metadata.participants ? metadata.participants.length : 0;
-                        const randomGoodbye = goodbyeMessages[Math.floor(Math.random() * goodbyeMessages.length)];
+            // 1️⃣ Welcome Event (মেম্বার জয়েন করলে)
+            if (anu.action === 'add') {
+                let profilePicUrl;
+                try {
+                    profilePicUrl = await bad.profilePictureUrl(jid, 'image');
+                } catch {
+                    profilePicUrl = null;
+                }
 
-                        await bad.sendMessage(id, {
-                            image: { url: goodbyeImage },
-                            caption: `*╭━━〔 👋 ɢᴏᴏᴅʙʏᴇ 〕━━┈⊷*\n┃\n┃ 😢 @${participant.split('@')[0]} ʟᴇғᴛ ᴛʜᴇ ɢʀᴏᴜᴘ!\n┃\n┃ 👥 ᴍᴇᴍʙᴇʀs ɴᴏᴡ: ${membersCount}\n┃\n┃ 📢 ᴍᴇssᴀɢᴇ: ${randomGoodbye}\n┃\n*╰━━━━━━━━━━━━━━━┈⊷*\n\n> *ᥫ᭡⃝—͞𝐅𝐚𝐡𝐢𝐦 𝐁¨зуᥫ᭡..࿐🌼⃠*`,
-                            mentions: [participant]
-                        });
-                    } catch (error) {
-                        console.error('❌ Goodbye Error:', error);
-                    }
+                const randomStatus = banglaStatus[Math.floor(Math.random() * banglaStatus.length)];
+
+                // 📩 ১ম মেসেজ: অরিজিনাল ওয়েলকাম টেক্সট
+                const welcomeMessage = 
+`🦢 *⎯͢✧ 𝐇ᴇʏ ${username}, ⎯͢✧ আমাদের গ্রুপ ${groupName}-এ তোমাকে স্বাগতম!* ✨
+
+💗 *⎯͢✧ ${randomStatus}* 🎧...
+
+🏠 *⎯͢✧ মোট সদস্য:* ${totalMembers}
+
+🌟 *⎯͢✧ নিয়ম:* অ্যাক্টিভ থাকো, সবাইকে রেসপেক্ট দাও ও মজা করো!
+
+⎯͢✧🤖 𝐁𝐨𝐭 𝐎𝐰𝐧𝐞𝐫 ⎯͢✧🐱
+
+⎯͢✧🌷 > *ᥫ᭡⃝—͞𝐅𝐚𝐡𝐢𝐦 𝐁bbzᥫ᭡..࿐🌼⃠*`;
+
+                if (profilePicUrl) {
+                    await bad.sendMessage(anu.id, {
+                        image: { url: profilePicUrl },
+                        caption: welcomeMessage,
+                        mentions: [jid]
+                    });
+                } else {
+                    await bad.sendMessage(anu.id, {
+                        text: welcomeMessage,
+                        mentions: [jid]
+                    });
+                }
+
+                // ⏳ ১.৫ সেকেন্ড অপেক্ষা করা
+                await new Promise(resolve => setTimeout(resolve, 1500));
+
+                // 👑 ২য় মেসেজ: কাস্টম স্টাইলিশ ইন্ট্রো ফর্ম
+                const introMessage = `╭══──────══╮
+   𝘎𝘪𝘷𝘦 𝘠𝘰𝘶𝘳 𝘐𝘯𝘵𝘳ο 
+   ${username}
+${groupName}
+╰══──────══╯
+
+╭══──────══╮
+ ☞𓋜𝐍ꫝ𝐦𝐞: 𓂃 ࣪˖ ִֶָ
+𓋜𝐀𝐠𝐞: ✮⃝🖤
+𓋜𝐂𝐥𝐚𝐬𝐬: 𓂃 ࣪˖ ִֶָ✨
+𓋜𝐟𝐯𝐭 𝐢𝐦𝐨𝐣𝐢: 𓂃 ࣪˖ ִֶָ
+𓋜𝐅𝐫𝐨𝐦: 𓂃 ࣪˖ ִֶָ📍
+𓋜𝐑𝐞𝐥𝐢𝐠𝐢𝐨𝐧:  𓂃 ࣪˖ ִֶ
+╰═════════════
+╭══──────══╮
+   𝘛𝘩𝘯𝘬 𝘺𝘰𝘶 𝘍𝘰𝘳 𝘢𝘥𝘳𝘦𝘴𝘴
+╰══──────══╯`;
+
+                try {
+                    await bad.sendMessage(anu.id, {
+                        text: introMessage,
+                        mentions: [jid]
+                    });
+                } catch (introError) {
+                    console.error("Intro Send Error:", introError);
                 }
             }
-        } catch (e) {
-            console.error("Group Update Event Error:", e);
+
+            // 2️⃣ Goodbye Event (মেম্বার লিভ নিলে বা কিক খেলে)
+            else if (anu.action === 'remove') {
+                const goodbyeMsg = `╭━━〔 👋 ɢᴏᴏᴅʙʏᴇ 〕━━┈⊷
+┃
+┃ 😢 ${username} ʟᴇғᴛ ᴛʜᴇ ɢʀᴏᴜᴘ!
+┃ 🫡 ভালো থেকো ভাই, আবার দেখা হবে!
+┃ 👥 *মোট সদস্য:* ${totalMembers}
+┃
+╰━━━━━━━━━━━━━━━┈⊷
+
+> *ᥫ᭡⃝—͞𝐅𝐚𝐡𝐢𝐦 𝐁bbzᥫ᭡..࿐🌼⃠*`;
+
+                await bad.sendMessage(anu.id, {
+                    text: goodbyeMsg,
+                    mentions: [jid]
+                });
+            }
         }
-    });
+    } catch (err) {
+        console.log("Group Update Event Error:", err);
+    }
+});
+
 
     // 🔥 MESSAGE HANDLER - This processes ALL incoming messages
     bad.ev.on('messages.upsert', async chatUpdate => {
