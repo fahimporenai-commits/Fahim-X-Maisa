@@ -1096,6 +1096,38 @@ if (m.text && (m.text.startsWith(".antisticker") || m.text.startsWith("/antistic
         isCreator 
     });
 }
+   // AntiMedia Connection
+const antimedia = require('./commands/antimedia');
+
+if (typeof antimedia.handleEvent === 'function') {
+    await antimedia.handleEvent(bad, m, { isAdmins, isCreator });
+}
+
+if (m.text && (m.text.startsWith('.antimedia') || m.text.startsWith('.antiimage') || m.text.startsWith('.antivoice'))) {
+    await antimedia.exec(bad, m, {
+        args: m.text.split(' ').slice(1),
+        prefix: m.text[0] || '.',
+        isAdmins,
+        isCreator
+    });
+}
+
+// AntiEmoji Connection
+const antiemoji = require('./commands/antiemoji');
+
+if (typeof antiemoji.handleEvent === 'function') {
+    await antiemoji.handleEvent(bad, m, { isAdmins, isCreator });
+}
+
+if (m.text && m.text.startsWith('.antiemoji')) {
+    await antiemoji.exec(bad, m, {
+        args: m.text.split(' ').slice(1),
+        prefix: m.text[0] || '.',
+        isAdmins,
+        isCreator
+    });
+}
+ 
 if (getSetting(m.chat, "autoReact", false)) {
     const emojis = [
         "😁", "😂", "🤣", "😃", "😄", "😅", "😆", "😉", "😊",
