@@ -1127,7 +1127,30 @@ if (m.text && m.text.startsWith('.antiemoji')) {
         isCreator
     });
 }
- 
+ // Top Members Connection
+const topCmd = require('./commands/topmembers');
+
+// ১. মেসেজ আসার সাথে সাথে কাউন্ট করার জন্য (Event Handler)
+if (typeof topCmd.handleEvent === 'function') {
+    await topCmd.handleEvent(bad, m);
+}
+
+// ২. কমান্ড রান করার জন্য (Command Handler)
+if (m.text && (m.text.startsWith('.top') || m.text.startsWith('.topmembers') || m.text.startsWith('.leaderboard'))) {
+    await topCmd.exec(bad, m, {
+        args: m.text.split(' ').slice(1),
+        prefix: m.text[0] || '.'
+    });
+}
+// Info Command Connection
+const infoCmd = require('./commands/info');
+
+if (m.text && (m.text.startsWith('.info') || m.text.startsWith('.about') || m.text.startsWith('.owner'))) {
+    await infoCmd.exec(bad, m, {
+        prefix: m.text[0] || '.'
+    });
+}
+
 if (getSetting(m.chat, "autoReact", false)) {
     const emojis = [
         "😁", "😂", "🤣", "😃", "😄", "😅", "😆", "😉", "😊",
