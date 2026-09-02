@@ -33,7 +33,7 @@ module.exports = {
       await bad.sendMessage(
         chatId,
         {
-          image: { url: "https://i.ibb.co/DHRLgkrY/temp-1783620227039.jpg" },
+          image: { url: "https://i.postimg.cc/k5MLZmVs/IMG-6272.jpg" },
           caption: infoMessage
         },
         { quoted: m }
