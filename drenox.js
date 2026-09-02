@@ -6880,7 +6880,7 @@ case 'contact': {
     
     await bad.sendMessage(m.chat, {
         contacts: {
-            displayName: '𝐅αнιм︎︎',
+            displayName: 'Fahim Hussine',
             contacts: [{ vcard: vcard1 }]
         }
     }, { quoted: msg });
@@ -6896,7 +6896,7 @@ case 'contact': {
     
     await bad.sendMessage(m.chat, {
         contacts: {
-            displayName: 'ᠻꪖꫝ𝓲ꪑ',
+            displayName: 'Fahim Hussine',
             contacts: [{ vcard: vcard2 }]
         }
     }, { quoted: msg });
