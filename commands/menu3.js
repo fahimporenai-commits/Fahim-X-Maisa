@@ -112,7 +112,7 @@ module.exports = {
 
     responseText += `\n\n╭═══════════════════════╮\n  💡 *Type ${usedPrefix}menu3 [cmd] for details* \n╰═══════════════════════╯\n\n_Made with ©ꜰᴀʜɪᴍ ʙʙᴢ_`;
 
-    const menuImgUrl = "https://i.ibb.co/DHRLgkrY/temp-1783620227039.jpg";
+    const menuImgUrl = "https://i.postimg.cc/nhhkfckZ/IMG-6279.jpg";
 
     try {
       await bad.sendMessage(chatId, {
