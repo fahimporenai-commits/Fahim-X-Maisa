@@ -478,19 +478,146 @@ ${groupName}
                 } catch (introError) {
                     console.error("Intro Send Error:", introError);
                 }
+bad.ev.on('group-participants.update', async (anu) => {
+    try {
+        const groupInfo = await bad.groupMetadata(anu.id).catch(() => ({ subject: 'Group', participants: [] }));
+        const groupName = groupInfo.subject;
+        const totalMembers = groupInfo.participants ? groupInfo.participants.length : 0;
+        const newMembers = anu.participants;
+
+        // 🔥 র‍্যান্ডম বাংলা স্ট্যাটাস (Welcome)
+        const banglaStatus = [
+            "🌸 নতুন অতিথি এসেছে, গ্রুপের হাওয়া বদলে গেলো!",
+            "✨ তোমায় পেয়ে আমাদের পরিবার আরও রঙিন!",
+            "💙 হাসিমুখে থেকো, গ্রুপ জমিয়ে রাখবে আশা করি!",
+            "🌺 নতুন রাজা এসে গেছে আমাদের গ্রুপে!",
+            "🔥 চল আজকে একটু ভিন্নরকম মজা হোক!",
+            "🎉 গ্রুপে ঢুকেই তোমার এন্ট্রি স্টাইলিশ!",
+            "🌼 আশা করি তুমি দারুণ অ্যাক্টিভ থাকবে!",
+            "😎 এসে যাও, এখন শুরু হোক আড্ডার রাজত্ব!",
+            "💫 তোমার কারণে গ্রুপের মান আরও আপ!",
+            "😂 গ্রুপের টেনশন এখন তোমার হাতে!",
+            "🌟 তোমায় ছাড়া গ্রুপটা যেন অসম্পূর্ণ ছিলো!",
+            "🌷 তোমাকে দেখে গ্রুপের ভাইব আপ হয়ে গেলো!",
+            "🔥 মনে হচ্ছে আজ গ্রুপে ঝড় আসছে!",
+            "🐥 গ্রুপে এক ফ্রেশ ভাইব ঢুকে গেছে!",
+            "💖 সবাইকে চমক দিতে তুমি এসেছো!",
+            "😄 গ্রুপে নতুন হাসির ঝিলিক!",
+            "🌈 আজ গ্রুপটা ফ্রেশ কারণ তুমি এসেছো!",
+            "⚡ তোমার এন্ট্রি = পুরো গ্রুপ চার্জড!",
+            "🎭 এখন থেকে গ্রুপে শুরু হবে আসল মজা!",
+            "💥 সাবধান! নতুন মেম্বার = নতুন ঝগড়া ও হাসি!",
+            "😂 ভাবছো শুধু এড হয়েছো? না! এখন তুমি পরিবারের অংশ!",
+            "🔮 মনে হচ্ছে তুমি গ্রুপের হিডেন লিজেন্ড!",
+            "😻 তোমার এন্ট্রি গ্রুপে কিউট ভাইব এনেছে!",
+            "🔥 গ্রুপে তোমার মতো একজনকেই দরকার ছিলো!"
+        ];
+
+        // 😹 ফানি গুডবাই লাইনগুলো
+        const goodbyeStatus = [
+            "⎯͢✧ পার্টি দেওয়ার ভয়ে @name পালিয়ে গেলো 😹",
+            "⎯͢✧ গ্রুপের ড্রামা দেখে @name সাইলেন্ট লিভ দিলো 😂",
+            "⎯͢✧ আজকের ভিকটিম @name — উধাও হয়ে গেলো 🤣",
+            "⎯͢✧ @name মনে হয় WiFi অফ করে পালিয়েছে 😆",
+            "⎯͢✧ মেসেজের ভয় পেয়ে @name দৌড় দিয়েছে 😹",
+            "⎯͢✧ গ্রুপের পাগলামি সহ্য করতে না পেরে @name চলে গেলো 😂",
+            "⎯͢✧ কেউ পার্টি বললেই @name হারিয়ে যায় 🤣",
+            "⎯͢✧ @name বললো “আমি ব্যস্ত” তারপর অফলাইন 😹",
+            "⎯͢✧ গ্রুপে ঢুকেই বুঝলো ভুল জায়গা—@name লিভ 😂",
+            "⎯͢✧ অতিরিক্ত হাসি সহ্য না করে @name পালালো 🤣",
+            "⎯͢✧ @name শেষ পর্যন্ত টিকতে পারলো না 😹",
+            "⎯͢✧ গ্রুপের নোটিফিকেশন দেখে @name ভয়ে পালালো 😂",
+            "⎯͢✧ কেউ ‘hi’ বলতেই @name উধাও 🤣",
+            "⎯͢✧ @name বললো “bye” না বলেই bye দিলো 😹",
+            "⎯͢✧ গ্রুপের এনার্জি সহ্য না করে @name লিভ 😂",
+            "⎯͢✧ @name আর এই পাগল গ্রুপ সহ্য করতে পারলো না 🤣",
+            "⎯͢✧ মেসেজ দেখে @name স্ট্রেস নিয়ে বের হয়ে গেলো 😹",
+            "⎯͢✧ গ্রুপে ঢুকেই বুঝলো—এখানে টিকে থাকা কঠিন @name 😂"
+        ];
+
+        for (const member of newMembers) {
+            const jid = typeof member === 'string' ? member : (member.id || '');
+            const phoneNumber = jid.split('@')[0];
+            if (!phoneNumber) continue;
+
+            const username = `@${phoneNumber}`;
+
+            // 1️⃣ Welcome Event (মেম্বার জয়েন করলে)
+            if (anu.action === 'add') {
+                let profilePicUrl;
+                try {
+                    profilePicUrl = await bad.profilePictureUrl(jid, 'image');
+                } catch {
+                    profilePicUrl = null;
+                }
+
+                const randomStatus = banglaStatus[Math.floor(Math.random() * banglaStatus.length)];
+
+                // 📩 ১ম মেসেজ: অরিজিনাল ওয়েলকাম টেক্সট
+                const welcomeMessage = 
+`🦢 *⎯͢✧ 𝐇ᴇʏ ${username}, ⎯͢✧ আমাদের গ্রুপ ${groupName}-এ তোমাকে স্বাগতম!* ✨
+
+💗 *⎯͢✧ ${randomStatus}* 🎧...
+
+🏠 *⎯͢✧ মোট সদস্য:* ${totalMembers}
+
+🌟 *⎯͢✧ নিয়ম:* অ্যাক্টিভ থাকো, সবাইকে রেসপেক্ট দাও ও মজা করো!
+
+⎯͢✧🤖 𝐁𝐨𝐭 𝐎𝐰𝐧𝐞𝐫 ⎯͢✧🐱
+
+⎯͢✧🌷 > *ᥫ᭡⃝—͞𝐅𝐚𝐡𝐢𝐦 𝐁bbzᥫ᭡..࿐🌼⃠*`;
+
+                if (profilePicUrl) {
+                    await bad.sendMessage(anu.id, {
+                        image: { url: profilePicUrl },
+                        caption: welcomeMessage,
+                        mentions: [jid]
+                    });
+                } else {
+                    await bad.sendMessage(anu.id, {
+                        text: welcomeMessage,
+                        mentions: [jid]
+                    });
+                }
+
+                // ⏳ ১.৫ সেকেন্ড অপেক্ষা করা
+                await new Promise(resolve => setTimeout(resolve, 1500));
+
+                // 👑 ২য় মেসেজ: কাস্টম স্টাইলিশ ইন্ট্রো ফর্ম
+                const introMessage = `╭══──────══╮
+   𝘎𝘪𝘷𝘦 𝘠𝘰𝘶𝘳 𝘐𝘯𝘵𝘳ο 
+   ${username}
+${groupName}
+╰══──────══╯
+
+╭══──────══╮
+ ☞𓋜𝐍ꫝ𝐦𝐞: 𓂃 ࣪˖ ִֶָ
+𓋜𝐀𝐠𝐞: ✮⃝🖤
+𓋜𝐂𝐥𝐚𝐬𝐬: 𓂃 ࣪˖ ִֶָ✨
+𓋜𝐟𝐯𝐭 𝐢𝐦𝐨𝐣𝐢: 𓂃 ࣪˖ ִֶָ
+𓋜𝐅𝐫𝐨𝐦: 𓂃 ࣪˖ ִֶָ📍
+𓋜𝐑𝐞𝐥𝐢𝐠𝐢𝐨𝐧:  𓂃 ࣪˖ ִֶ
+╰═════════════
+╭══──────══╮
+   𝘛𝘩𝘯𝘬 𝘺𝘰𝘶 𝘍𝘰𝘳 𝘢𝘥𝘳𝘦𝘴𝘴
+╰══──────══╯`;
+
+                try {
+                    await bad.sendMessage(anu.id, {
+                        text: introMessage,
+                        mentions: [jid]
+                    });
+                } catch (introError) {
+                    console.error("Intro Send Error:", introError);
+                }
             }
 
-            // 2️⃣ Goodbye Event (মেম্বার লিভ নিলে বা কিক খেলে)
+            // 2️⃣ Goodbye Event (মেম্বার লিভ নিলে বা কিক খেলে - ফানি স্টাইল)
             else if (anu.action === 'remove') {
-                const goodbyeMsg = `╭━━〔 👋 ɢᴏᴏᴅʙʏᴇ 〕━━┈⊷
-┃
-┃ 😢 ${username} ʟᴇғᴛ ᴛʜᴇ ɢʀᴏᴜᴘ!
-┃ 🫡 ভালো থেকো ভাই, আবার দেখা হবে!
-┃ 👥 *মোট সদস্য:* ${totalMembers}
-┃
-╰━━━━━━━━━━━━━━━┈⊷
+                const randomGoodbye = goodbyeStatus[Math.floor(Math.random() * goodbyeStatus.length)];
+                const goodbyeLine = randomGoodbye.replace("@name", username);
 
-> *ᥫ᭡⃝—͞𝐅𝐚𝐡𝐢𝐦 𝐁bbzᥫ᭡..࿐🌼⃠*`;
+                const goodbyeMsg = `${goodbyeLine}\n\n> *ᥫ᭡⃝—͞𝐅𝐚𝐡𝐢𝐦 𝐁bbzᥫ᭡..࿐🌼⃠*`;
 
                 await bad.sendMessage(anu.id, {
                     text: goodbyeMsg,
