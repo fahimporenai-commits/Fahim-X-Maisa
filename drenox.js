@@ -6628,7 +6628,7 @@ case 'song': {
         }
     }
 }
-break;
+break
 
       //═══════════════════════════════════════════════════════════
 // TIKTOK - Download TikTok Videos
