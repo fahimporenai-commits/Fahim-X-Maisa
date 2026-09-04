@@ -1073,16 +1073,13 @@ function smsg(bad, m, store) {
             m.quoted.download = () => bad.downloadMediaMessage(m.quoted)
         }
     }
-    if (m.msg?.url) m.download = () => bad.downloadMediaMessage(m.msg)
+        if (m.msg?.url) m.download = () => bad.downloadMediaMessage(m.msg)
     m.text = m.msg?.text || m.msg?.caption || m.message?.conversation || m.msg?.contentText || m.msg?.selectedDisplayText || m.msg?.title || ''
     m.reply = (text, chatId = m.chat, options = {}) => Buffer.isBuffer(text) ? bad.sendMedia(chatId, text, 'file', '', m, { ...options }) : bad.sendText(chatId, text, m, { ...options })
     m.copy = () => exports.smsg(bad, M.fromObject(M.toObject(m)))
-            m.copyNForward = (jid = m.chat, forceForward = false, options = {}) => bad.copyNForward(jid, m, forceForward, options)
+    m.copyNForward = (jid = m.chat, forceForward = false, options = {}) => bad.copyNForward(jid, m, forceForward, options)
 
-        return m
-    } catch (e) {
-        console.error(e)
-    }
+    return m
 }
 
 let file = require.resolve(__filename)
