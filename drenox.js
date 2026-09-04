@@ -6459,69 +6459,177 @@ break;
 // ══════════════════════════════════════════════════════════
    
 case 'play':
+case 'play2':
 case 'song': {
-  if (!text) return reply(`🎵 Provide a song name`)
+    const fs = require("fs");
+    const path = require("path");
+    const axios = require("axios");
+    const nayan = require("nayan-media-downloaders");
+    const Youtube = require("youtube-search-api");
+    const ffmpeg = require("fluent-ffmpeg");
 
-  try {
-    await bad.sendMessage(m.chat, { react: { text: '🎶', key: m.key } })
+    const keyword = text || args.join(" ");
 
-    const yts = require('yt-search')
-    const axios = require('axios')
-
-    // 1️⃣ YouTube Search
-    const search = await yts(text)
-    if (!search.videos.length) {
-      await bad.sendMessage(m.chat, { react: { text: '❌', key: m.key } })
-      return reply('❌ No results found')
+    if (!keyword) {
+        return bad.sendMessage(m.chat, {
+            text: `╭──◆「 *PLAY2 COMMAND* 」◆\n` +
+                  `├\n` +
+                  `├◇ ⚠️ Please provide a song name.\n` +
+                  `├◇ 💡 Example: ${prefix}play2 pal pal\n` +
+                  `├\n` +
+                  `╰─┬─★─☆─♪♪─◆\n\n` +
+                  `╭──◆「 *FAHIM BBZ* 」◆\n` +
+                  `╰───★─☆─♪♪─◆`,
+        }, { quoted: m });
     }
 
-    const video = search.videos[0]
+    const LOADING_FRAMES = [
+        '⚡ Loading Audio... [▰▱▱▱▱▱▱▱▱▱]',
+        '⚡ Fetching Server... [▰▰▱▱▱▱▱▱▱▱]',
+        '⚡ Processing Song... [▰▰▰▱▱▱▱▱▱▱]',
+        '⚡ Converting MP3... [▰▰▰▰▱▱▱▱▱▱]',
+        '⚡ Downloading Track... [▰▰▰▰▰▱▱▱▱▱]',
+        '⚡ Almost Done... [▰▰▰▰▰▰▱▱▱▱]',
+        '⚡ Finalizing Audio... [▰▰▰▰▰▰▰▱▱▱]',
+        '⚡ Complete... [▰▰▰▰▰▰▰▰▰▰]'
+    ];
 
-    // 2️⃣ API Call
-    const api = `https://api.ootaizumi.web.id/downloader/youtube`
-    const { data } = await axios.get(api, {
-      params: {
-        url: video.url,
-        format: 'mp3'
-      }
-    })
+    const downloadAndConvertToMp3 = (url, filePath) => {
+        return new Promise((resolve, reject) => {
+            const tempFile = filePath.replace(".mp3", ".tmp");
+            axios({
+                method: "get",
+                url,
+                responseType: "stream",
+            })
+            .then((response) => {
+                const writer = fs.createWriteStream(tempFile);
+                response.data.pipe(writer);
 
-    if (!data.status || !data.result?.download) {
-      throw new Error('Download failed')
-    }
+                writer.on("finish", () => {
+                    ffmpeg(tempFile)
+                        .toFormat("mp3")
+                        .on("end", () => {
+                            if (fs.existsSync(tempFile)) fs.unlinkSync(tempFile);
+                            resolve(filePath);
+                        })
+                        .on("error", reject)
+                        .save(filePath);
+                });
 
-    const result = data.result
+                writer.on("error", reject);
+            })
+            .catch(reject);
+        });
+    };
 
-    // 3️⃣ Send Audio
-    await bad.sendMessage(
-      m.chat,
-      {
-        audio: { url: result.download },
-        mimetype: 'audio/mpeg',
-        fileName: `${result.title}.mp3`,
-        contextInfo: {
-          externalAdReply: {
-            title: result.title,
-            body: result.author?.channelTitle || 'YouTube Audio',
-            thumbnailUrl: result.thumbnail,
-            sourceUrl: video.url,
-            mediaType: 1,
-            renderLargerThumbnail: true
-          }
+    let loadingMsg;
+    let interval;
+
+    try {
+        const results = await Youtube.GetListByKeyword(keyword, false, 1);
+        if (!results.items || !results.items.length) {
+            return bad.sendMessage(m.chat, { text: "❌ No results found on YouTube." }, { quoted: m });
         }
-      },
-      { quoted: m }
-    )
 
-    await bad.sendMessage(m.chat, { react: { text: '✅', key: m.key } })
+        const videoId = results.items[0].id;
+        const title = results.items[0].title;
+        const selectedLink = `https://www.youtube.com/watch?v=${videoId}`;
 
-  } catch (e) {
-    console.error(e)
-    await bad.sendMessage(m.chat, { react: { text: '❌', key: m.key } })
-    reply('⚠️ Error while processing the request')
-  }
+        const getFormattedText = (statusText) => {
+            return `╭╼━≪••≫━╾╮\n` +
+                   `┃ 𝐅αнιм ввz мυѕι¢ 🎵\n` +
+                   `╰━━━━━━━━━━━━━━━╯\n` +
+                   `╭〔 𝘋ᴏᴡɴʟᴏᴅᴇ-ꜱᴏɴɢ 〕-━╮\n` +
+                   `**━━┈⊷*\n` +
+                   ` │ │🌸 _Title:_ *${title}*\n` +
+                   ` │ │⏳ :- *${statusText}*\n` +
+                   `*╰──────✧❁✧──────◆*\n` +
+                   ` ╭──◆「 *FAHIM BBZ* 」◆\n` +
+                   ` ╰───★─☆─♪♪─◆`;
+        };
+
+        // 🔍 প্রথম লোডিং মেসেজ পাঠানো
+        loadingMsg = await bad.sendMessage(m.chat, {
+            text: getFormattedText(LOADING_FRAMES[0]),
+        }, { quoted: m });
+
+        // ⏳ প্রোগ্রেস বার এনিমেশন আপডেট
+        let frame = 1;
+        interval = setInterval(async () => {
+            try {
+                if (frame < LOADING_FRAMES.length) {
+                    const frameText = getFormattedText(LOADING_FRAMES[frame]);
+                    await bad.sendMessage(m.chat, { edit: loadingMsg.key, text: frameText });
+                    frame++;
+                }
+            } catch (e) {}
+        }, 1800);
+
+        // 📥 নয়ান ডাউনলোডার থেকে লিংক আনা
+        const data = await nayan.ytdown(selectedLink);
+        const audioUrl = data?.data?.audio || data?.audio;
+
+        if (!audioUrl) {
+            throw new Error("Audio URL missing from Nayan API");
+        }
+
+        // cache ফোল্ডার চেক ও তৈরি
+        const cacheDir = path.join(__dirname, "cache");
+        if (!fs.existsSync(cacheDir)) {
+            fs.mkdirSync(cacheDir, { recursive: true });
+        }
+
+        const filePath = path.join(cacheDir, `play_${Date.now()}.mp3`);
+
+        // 🔄 অডিও ডাউনলোড ও কনভার্ট
+        await downloadAndConvertToMp3(audioUrl, filePath);
+
+        if (interval) clearInterval(interval);
+
+        // 🗑️ লোডিং মেসেজ ডিলিট
+        try {
+            await bad.sendMessage(m.chat, {
+                delete: loadingMsg.key
+            });
+        } catch (e) {}
+
+        // 🎵 অডিও মেসেজ সেন্ড
+        await bad.sendMessage(
+            m.chat,
+            {
+                audio: { url: filePath },
+                mimetype: "audio/mpeg",
+                fileName: `${title} - FAHIM BBZ.mp3`,
+                caption: `╭╼━≪••≫━╾╮\n` +
+                         `┃ 𝐅αнιм ввz мυѕι¢ 🎵\n` +
+                         `╰━━━━━━━━━━━━━━━╯`,
+                ptt: false,
+            },
+            { quoted: m }
+        );
+
+        // 🧹 টেম্পোরারি ফাইল ক্লিনআপ
+        if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+
+    } catch (error) {
+        if (interval) clearInterval(interval);
+        console.error("❌ Error in play command:", error);
+
+        const failText = `❌ Failed to play the song. Try again later.`;
+        if (loadingMsg) {
+            try {
+                await bad.sendMessage(m.chat, { edit: loadingMsg.key, text: failText });
+            } catch (e) {
+                await bad.sendMessage(m.chat, { text: failText }, { quoted: m });
+            }
+        } else {
+            await bad.sendMessage(m.chat, { text: failText }, { quoted: m });
+        }
+    }
 }
-break
+break;
+
       //═══════════════════════════════════════════════════════════
 // TIKTOK - Download TikTok Videos
 // ═══════════════════════════════════════════════════════════
