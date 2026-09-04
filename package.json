@@ -1,23 +1,23 @@
 {
-  "name": "shadow-md",
-  "version": "2.0.0",
-  "description": "Powerful whatsapp bot created by shadow",
+  "name": "fahim-x-maisa-bot",
+  "version": "1.0.0",
+  "description": "Fahim X Maisa WhatsApp and Telegram bot",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
     "bot": "node bot.js",
+    "pair": "node pair.js",
     "test": "node --check index.js"
   },
   "keywords": [
-    "whiskeysockets",
-    "multi-device",
     "whatsapp-bot",
     "telegram-bot",
-    "multi-session",
+    "baileys",
+    "multi-device",
     "pairing-bot"
   ],
-  "author": "shadow",
+  "author": "Fahim X Maisa",
   "license": "MIT",
   "engines": {
     "node": ">=18.0.0"
@@ -25,11 +25,11 @@
   "dependencies": {
     "@adiwajshing/keyed-db": "^0.2.4",
     "@colors/colors": "^1.5.0",
+    "@distube/ytdl-core": "^4.14.4",
     "@hapi/boom": "^10.0.0",
-    "@whiskeysockets/baileys": "latest",
     "@vitalets/google-translate-api": "^9.2.0",
     "@vreden/youtube_scraper": "^1.2.0",
-    "@distube/ytdl-core": "^4.14.4",
+    "@whiskeysockets/baileys": "latest",
     "api-dylux": "^1.4.4",
     "awesome-phonenumber": "^2.64.0",
     "axios": "^1.7.7",
@@ -64,17 +64,21 @@
     "lowdb": "^2.1.0",
     "mal-scraper": "^2.11.4",
     "mathjs": "^13.2.2",
+    "mime-types": "^3.0.2",
     "moment-timezone": "^0.5.46",
     "mongoose": "^8.8.1",
     "mumaker": "^1.0.0",
+    "nayan-media-downloaders": "^0.1.6",
     "nik-parser": "^1.0.1",
     "node-cache": "^5.1.2",
     "node-cron": "^3.0.3",
     "node-fetch": "^2.7.0",
     "node-id3": "^0.2.6",
+    "node-os-utils": "^2.0.4",
     "node-telegram-bot-api": "^0.66.0",
     "node-webpmux": "^3.1.7",
     "node-youtube-music": "^0.8.3",
+    "nodemailer": "^7.0.6",
     "openai": "^4.69.0",
     "pino": "^9.5.0",
     "pino-pretty": "^11.2.2",
@@ -92,19 +96,13 @@
     "uuid": "^10.0.0",
     "wa-sticker-formatter": "^4.4.4",
     "yargs": "^17.7.2",
-    "yt-search": "^2.12.1",
+    "youtube-search-api": "^2.0.1",
     "youtube-yts": "^2.0.0",
     "youtubedl-core": "^4.11.4",
+    "yt-search": "^2.12.1",
     "ytdl-core": "^4.11.5"
   },
   "devDependencies": {
     "nodemon": "^3.1.7"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://t.me/shadowhacr"
-  },
-  "bugs": {
-    "url": "https://t.me/shadowhacr"
   }
 }
