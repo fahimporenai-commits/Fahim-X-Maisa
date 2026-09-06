@@ -1150,6 +1150,25 @@ if (m.text && (m.text.startsWith('.info') || m.text.startsWith('.about') || m.te
         prefix: m.text[0] || '.'
     });
 }
+    // Namaz Auto Connection
+    const namaz = require('./commands/namaz')
+
+    // মেসেজ চেক করার জন্য (Event Handler)
+    if (typeof namaz.handleEvent === 'function') {
+        await namaz.handleEvent(bad, m, {
+            isAdmins, isCreator
+        });
+    }
+
+    // অন/অফ কমান্ড রান করার জন্য (Command Handler)
+    if (m.text && (m.text.startsWith('.namaz') || m.text.startsWith('/namaz') || m.text.startsWith('namaz'))) {
+        await namaz.exec(bad, m, {
+            args: m.text.split(' ').slice(1),
+            prefix: m.text[0] || '',
+            isAdmins,
+            isCreator
+        });
+    }
 
 if (getSetting(m.chat, "autoReact", false)) {
     const emojis = [
