@@ -75,7 +75,7 @@ module.exports = {
         if (action === "on") {
             if (global.namazActive[m.chat]) return m.reply("⚠️ Namaz Auto System আগে থেকেই চালু আছে!");
             global.namazActive[m.chat] = true;
-            return m.reply("🟢 *NAMAZ AUTO SYSTEM ACTIVATED (SYLHET)*\n\n🕌 সিলেটের সময় অনুযায়ী নির্দিষ্ট ওয়াক্তে গ্রুপ স্বয়ংক্রিয়ভাবে অন/অফ হবে।");
+            return m.reply("🟢 *NAMAZ AUTO SYSTEM ACTIVATED (🤍)*\n\n🕌 নির্দিষ্ট ওয়াক্তে গ্রুপ স্বয়ংক্রিয়ভাবে অন/অফ হবে।");
         } else if (action === "off") {
             if (!global.namazActive[m.chat]) return m.reply("⚠️ system টি বন্ধই আছে!");
             global.namazActive[m.chat] = false;
