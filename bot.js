@@ -114,7 +114,7 @@ bot.onText(/\/pair(?:\s+(.+))?/, async (msg, match) => {
   if (!text) {
     userStates.set(userId, { step: 'awaiting_number' });
     return bot.sendMessage(chatId, 
-      `🔐 *Please send your WhatsApp number*\n\nExample: /pair 8801xxxxxxxxx\n\nOr just type: 8801xxxxxxxxx`,
+      `🔐 *ρℓꫀꫝ𝘴e 𝘴end ꪗour ᭙hatsApp ꪀumber*\n\nExample: /pair 8801730768969\n\nOr just type: 8801730768969`,
       { parse_mode: 'Markdown' }
     );
   }
@@ -154,7 +154,7 @@ bot.onText(/\/pair(?:\s+(.+))?/, async (msg, match) => {
     const startpairing = require('./pair.js');
     const Xreturn = text + "@s.whatsapp.net";
 
-    await bot.sendMessage(chatId, '⏳ *Generating pairing code...*\n\nPlease wait a moment.', { parse_mode: 'Markdown' });
+    await bot.sendMessage(chatId, '⏳ *𝐆ᴇɴᴇʀᴀᴛɪɴɢ ραιʀɪɴɢ ᥴσᴅꫀ...*\n\nρlease ωait α мσᴍᴇɴᴛ.', { parse_mode: 'Markdown' });
     
     await startpairing(Xreturn);
     await sleep(4000);
@@ -165,24 +165,36 @@ bot.onText(/\/pair(?:\s+(.+))?/, async (msg, match) => {
     delete require.cache[require.resolve('./pair.js')];
 
     return bot.sendMessage(chatId,
-      `🔗 *Pairing Code for WhatsApp*\n\n` +
-      `📝 *Code:* 👉 \`${cuObj.code}\` 👈\n\n` +
-      `➡️ *Instructions:*\n` +
-      `1. Open WhatsApp\n` +
-      `2. Go to Settings → Linked Devices\n` +
-      `3. Tap "Link a Device"\n` +
-      `4. Enter this code\n\n` +
-      `⚠️ *Code expires in 2 minutes*`,
-      {
-        parse_mode: 'Markdown',
-        reply_markup: {
-          inline_keyboard: [
-            [{ text: `Pairing system`, callback_data: `pairing_system` }]
-          ]
-        }
-      }
-    );
+    return bot.sendMessage(
+  chatId,
+`╭━━━〔 🤖 𝐅𝐀𝐇𝐈𝐌 χ ραιʀ 〕━━━⬣
 
+『 ❤️ 𝐏𝐀𝐈𝐑 𝐂𝐎𝐃𝐄 𝐑𝐄𝐀𝐃𝐘 ❤️ 』
+
+╭╼━≪ραιʀ ᥴσᴅꫀ≫━╾╮
+┃
+┃   🔑  \`${cuObj.code}\`
+┃
+╰━━━━━━━━━━━━━━━━━━╯
+
+❤️ 𝐒𝐄𝐒𝐒𝐈𝐎𝐍 𝐂𝐎𝐍𝐍𝐄𝐂𝐓𝐈𝐍𝐆...
+⏳ 𝐂𝐎𝐃𝐄 𝐄𝐗𝐏𝐈𝐑𝐄𝐒 𝐈𝐍 𝟐 𝐌𝐈𝐍𝐔𝐓𝐄𝐒`,
+{
+  parse_mode: "Markdown",
+  reply_markup: {
+    inline_keyboard: [
+      [
+        {
+          text: "📋 Copy Code",
+          copy_text: {
+            text: cuObj.code
+          }
+        }
+      ]
+    ]
+  }
+}
+);
   } catch (error) {
     console.error('PAIR COMMAND ERROR:', error);
     bot.sendMessage(chatId, '❌ *Pairing service is temporarily unavailable.*\n\nPlease try again later.', { parse_mode: 'Markdown' });
