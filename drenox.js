@@ -1169,6 +1169,37 @@ if (m.text && (m.text.startsWith('.info') || m.text.startsWith('.about') || m.te
             isCreator
         });
     }
+// ১. Auto Downloader ফাইল ইম্পোর্ট
+const alldown = require('./commands/alldown');
+
+// ২. অটো লিঙ্ক ডিটেক্টর (Event Handler) - প্রিফিক্স ছাড়া কাজ করবে
+if (typeof alldown.event === 'function') {
+    await alldown.event({
+        event: {
+            threadId: m.chat,
+            react: async (emoji) => {
+                try { await bad.sendMessage(m.chat, { react: { text: emoji, key: m.key } }) } catch (e) {}
+            }
+        },
+        api: bad,
+        body: m.text || ""
+    });
+}
+
+// ৩. কমান্ড ও অন/অফ সিস্টেম (Command Handler)
+if (m.text && (m.text.startsWith('.alldown') || m.text.startsWith('.download') || m.text.startsWith('.vd'))) {
+    const args = m.text.trim().split(/ +/).slice(1);
+    await alldown.start({
+        api: bad,
+        event: {
+            threadId: m.chat,
+            react: async (emoji) => {
+                try { await bad.sendMessage(m.chat, { react: { text: emoji, key: m.key } }) } catch (e) {}
+            }
+        },
+        args: args
+    });
+}
 
 if (getSetting(m.chat, "autoReact", false)) {
     const emojis = [
