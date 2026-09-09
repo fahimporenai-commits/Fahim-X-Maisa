@@ -213,51 +213,23 @@ prefix: 'both'  →  Both modes work
 ### 1️⃣ Fork the Repository
 
 <div align="center">
-  <a href="https://github.com/fahim hussine-OFFICIAL/Fahim-WHATSAPP-BOT/fork">
+  <a href="
     <img src="https://img.shields.io/badge/%F0%9F%94%B1_Fork_Repository-0078E7?style=for-the-badge&logo=github&logoColor=white" alt="Fork"/>
   </a>
 </div>
 
-### 2️⃣ Clone & Install
+
 
 ```bash
-# Clone the repository
-git clone https://github.com/MOHAMMAD-NAYAN-OFFICIAL/NAYAN-WHATSAPP-BOT.git
+# 
 
-# Go into the folder
-cd NAYAN-WHATSAPP-BOT
 
-# Install dependencies
-npm install
-```
-
-### 3️⃣ Run the Bot
-
-```bash
-node index.js
-```
 
 
 
 ---
 
-## 🌐 Deploy Online
-
-<div align="center">
-
-| Platform | Link |
-|----------|------|
-| 🎬 YouTube Tutorial | [![YouTube](https://img.shields.io/badge/Watch-Tutorial-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://youtu.be/maayqyNRVoU?si=V0o0wDq81uYf2KAk) |
-| 🤖 BotHosting | [![BotHosting](https://img.shields.io/badge/Deploy-BotHosting-28a745?style=for-the-badge)](https://bot-hosting.net/) |
-| 🚀 HMV Hosting | [![HMV](https://img.shields.io/badge/Deploy-HMV_Hosting-28a745?style=for-the-badge)](https://dash.hmvhostings.com/register?ref=pShF2nc4/) |
-| 🌙 Lunes Host | [![Lunes](https://img.shields.io/badge/Deploy-Lunes_Host-28a745?style=for-the-badge)](https://lunes.host/) |
-
-</div>
-
----
-
-## 📂 Project Structure
-
+#
 ```
 Fahim-WHATSAPP-BOT/
 │
@@ -283,11 +255,7 @@ Fahim-WHATSAPP-BOT/
 ## 🤝 Community & Support
 
 
-&nbsp;&nbsp;
-[![Telegram Support]()
-&nbsp;&nbsp;
-[![WhatsApp Support](https://img.shields.io/badge/💬-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)]()
-
+&
 </div>
 
 ---
