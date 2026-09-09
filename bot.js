@@ -165,8 +165,6 @@ bot.onText(/\/pair(?:\s+(.+))?/, async (msg, match) => {
     delete require.cache[require.resolve('./pair.js')];
 
     return bot.sendMessage(chatId,
-    return bot.sendMessage(
-  chatId,
 `╭━━━〔 🤖 𝐅𝐀𝐇𝐈𝐌 χ ραιʀ 〕━━━⬣
 
 『 ❤️ 𝐏𝐀𝐈𝐑 𝐂𝐎𝐃𝐄 𝐑𝐄𝐀𝐃𝐘 ❤️ 』
