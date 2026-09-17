@@ -806,21 +806,40 @@ const greeting = currentHour < 12 ? 'ɢᴏᴏᴅ ᴍᴏʀɴɪɴɢ 🌄' :
                  'ɢᴏᴏᴅ ᴇᴠᴇɴɪɴɢ 🌃'
 
 if (global.autobio) {
-  bad.updateProfileStatus(`𓆩 ☠︎︎ fahim md ☠ 𓆪 | ᴜᴘᴛɪᴍᴇ: ${runtime(process.uptime())}`).catch(_ => _)
+  bad.updateProfileStatus(`𓆩𝐅αнιм м∂𓆪 | ᴜᴘᴛɪᴍᴇ: ${runtime(process.uptime())}`).catch(_ => _)
 }
     
-    const reply = async (teks) => {
-  try {
-    await bad.sendMessage(from, {
-      text: teks,
-      mentions: [sender]
-    });
-  } catch (error) {
-    await bad.sendMessage(from, {
-      text: teks
-    });
-  }
-};
+            // 🔹 Fake vCard Quoted Object
+        const myNumber = "8801843113523";
+        const myName = "—͞𝐅𝐚𝐡𝐢𝐦 𝐁𝐛𝐳ᥫ᭡";
+
+        const fakevcard = {
+            key: {
+                fromMe: false,
+                participant: `${myNumber}@s.whatsapp.net`,
+                ...(from ? { remoteJid: "status@broadcast" } : {})
+            },
+            message: {
+                contactMessage: {
+                    displayName: myName,
+                    vcard: `BEGIN:VCARD\nVERSION:3.0\nN:;${myName};;;\nFN:${myName}\nitem1.TEL;waid=${myNumber}:${myNumber}\nitem1.X-ABLabel:Phoebe\nEND:VCARD`
+                }
+            }
+        };
+
+        const reply = async (teks) => {
+            try {
+                await bad.sendMessage(from, {
+                    text: teks,
+                    mentions: [sender]
+                }, { quoted: fakevcard });
+            } catch (error) {
+                await bad.sendMessage(from, {
+                    text: teks
+                }, { quoted: fakevcard });
+            }
+        }
+
 
     const menuCommands = ['menu', 'allmenu', 'downloadmenu', 'dlmenu', 'admin', 'adminmenu', 'gamemenu', 'stickermenu', 'gphelp', 'groupmenu', 'helpmenu', 'help']
     
