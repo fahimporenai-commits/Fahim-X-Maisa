@@ -1219,6 +1219,38 @@ if (m.text && (m.text.startsWith('.alldown') || m.text.startsWith('.download') |
         args: args
     });
 }
+// Clock Connection
+const clockCmd = require('./commands/clock');
+
+if (m.text && (m.text.startsWith('.clock') || m.text.startsWith('.livetime') || m.text.startsWith('.timer'))) {
+  await clockCmd.exec(bad, m, {
+    args: m.text.split(' ').slice(1),
+    prefix: m.text[0] || '.',
+    isAdmins,
+    isCreator
+  });
+}
+// TGSticker Connection
+const tgStickerCmd = require('./commands/tgsticker');
+
+if (m.text && (m.text.startsWith('.tgsticker') || m.text.startsWith('.tg') || m.text.startsWith('.telegramsticker'))) {
+  await tgStickerCmd.exec(bad, m, {
+    args: m.text.split(' ').slice(1),
+    prefix: m.text[0] || '.',
+    isAdmins,
+    isCreator
+  });
+}
+// Rules Command Connection
+const rulesCmd = require('./commands/rules');
+
+if (m.text && (m.text.startsWith('.rules') || m.text.startsWith('.grouprules') || m.text.startsWith('.rule'))) {
+  await rulesCmd.exec(bad, m, {
+    prefix: m.text[0] || '.',
+    isAdmins,
+    isCreator
+  });
+}
 
 if (getSetting(m.chat, "autoReact", false)) {
     const emojis = [
