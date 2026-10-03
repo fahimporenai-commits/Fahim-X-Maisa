@@ -1251,7 +1251,105 @@ if (m.text && (m.text.startsWith('.rules') || m.text.startsWith('.grouprules') |
     isCreator
   });
 }
+// ProfilePic Connection
+const ppCmd = require('./commands/profilepic');
 
+if (m.text && (m.text.startsWith('.profilepic') || m.text.startsWith('.pp') || m.text.startsWith('.avatar') || m.text.startsWith('.getpp'))) {
+  await ppCmd.exec(bad, m, {
+    args: m.text.split(' ').slice(1),
+    prefix: m.text[0] || '.',
+    isAdmins,
+    isCreator
+  });
+}
+
+// Video Command Connection
+const videoCmd = require('./commands/video');
+
+if (m.text && (m.text.startsWith('.video') || m.text.startsWith('.v') || m.text.startsWith('.ytdl'))) {
+  await videoCmd.exec(bad, m, {
+    args: m.text.split(' ').slice(1),
+    prefix: m.text[0] || '.',
+    isAdmins,
+    isCreator
+  });
+}
+
+// Saveline (Inbox/DM) Connection
+const savelineCmd = require('./commands/saveline');
+if (m.text && (m.text.startsWith('.saveline') || m.text.startsWith('.linesave') || m.text.startsWith('.addlines'))) {
+  await savelineCmd.exec(bad, m, {
+    args: m.text.split(' ').slice(1),
+    prefix: m.text[0] || '.',
+    isAdmins,
+    isCreator
+  });
+}
+
+// Setline (Group Poll Reply) Connection
+const setlineCmd = require('./commands/setline');
+if (m.text && (m.text.startsWith('.setline') || m.text.startsWith('.lineset') || m.text.startsWith('.distributeline'))) {
+  await setlineCmd.exec(bad, m, {
+    args: m.text.split(' ').slice(1),
+    prefix: m.text[0] || '.',
+    isAdmins,
+    isCreator
+  });
+}
+//video2
+const video2Cmd = require('./commands/video2');
+
+// Main .video2 command
+if (m.text && (m.text.startsWith('.video2') || m.text.startsWith('.album') || m.text.startsWith('.v2'))) {
+  await video2Cmd.exec(bad, m, {
+    args: m.text.split(' ').slice(1),
+    prefix: m.text[0] || '.',
+    isAdmins,
+    isCreator
+  });
+}
+
+// Handling reply to the video album menu
+if (m.quoted && m.quoted.text && m.quoted.text.includes("====「 𝐕𝐈𝐃𝐄𝐎 𝐀𝐋𝐁𝐔𝐌 」====")) {
+  await video2Cmd.handleReply(bad, m, {
+    prefix: '.'
+  });
+}
+
+// bby2 
+const bbyCmd = require('./commands/bby');
+
+// Check message triggers (Prefix সহ বা ছাড়া)
+if (m.text) {
+  const textLower = m.text.trim().toLowerCase();
+  const triggers = ['bby', 'jan', 'baby', 'shona', 'ai', '.bby', '.jan', '.baby', '.shona', '.ai'];
+  
+  const isTriggered = triggers.some(trig => textLower === trig || textLower.startsWith(trig + ' '));
+
+  if (isTriggered) {
+    const firstWord = textLower.split(' ')[0];
+    const args = m.text.trim().split(' ').slice(1);
+    
+    await bbyCmd.exec(bad, m, {
+      args: args,
+      prefix: firstWord.startsWith('.') ? '.' : '',
+      isAdmins,
+      isCreator
+    });
+  }
+}
+
+// cpl pic
+const coupleCmd = require('./commands/couple');
+
+if (m.text && (m.text.startsWith('.couple') || m.text.startsWith('.love') || m.text.startsWith('.jora') || m.text.startsWith('.pair'))) {
+  await coupleCmd.exec(bad, m, {
+    args: m.text.split(' ').slice(1),
+    prefix: m.text[0] || '.',
+    isAdmins,
+    isCreator
+  });
+    }
 if (getSetting(m.chat, "autoReact", false)) {
     const emojis = [
         "😁", "😂", "🤣", "😃", "😄", "😅", "😆", "😉", "😊",
@@ -5547,7 +5645,7 @@ ${prefix}tgstalk ☠︎︎ fαнιм χ вσт ☠︎︎`)
     if (!data) return reply('❌ ᴜsᴇʀ ɴᴏᴛ ғᴏᴜɴᴅ')
     
     await bad.sendMessage(from, {
-      image: { url: data.photo || data.avatar || 'https://i.postimg.cc/nc3hqXZk/IMG-6271.jpg' },
+      image: { url: data.photo || data.avatar || '' },
       caption: `*╭━━〔 ✈️ ᴛᴇʟᴇɢʀᴀᴍ ᴜsᴇʀ sᴛᴀʟᴋ 〕━━┈⊷*
 ┃
 ┃ 👤 ᴜsᴇʀɴᴀᴍᴇ: ${data.username || 'N/A'}
@@ -7083,7 +7181,7 @@ case 'contact': {
     // 👑 Owner 1 - shadow 
     const vcard1 = 'BEGIN:VCARD\n' +
                   'VERSION:3.0\n' +
-                  'FN: 𝑺𝑯𝑨𝑫𝑶𝑾︎\n' +
+                  'FN: Fahim bbz\n' +
                   'TEL;type=CELL;type=VOICE;waid=8801843113523:+8801843113523\n' +
                   'END:VCARD';
     
@@ -7099,7 +7197,7 @@ case 'contact': {
     // 👑 Owner 2 - ZAMAN
     const vcard2 = 'BEGIN:VCARD\n' +
                   'VERSION:3.0\n' +
-                  'FN: RIZWAN\n' +
+                  'FN: Fahim Hussain\n' +
                   'TEL;type=CELL;type=VOICE;waid=8801843113523:+8801843113524\n' +
                   'END:VCARD';
     
