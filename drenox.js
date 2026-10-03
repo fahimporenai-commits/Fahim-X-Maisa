@@ -1317,39 +1317,41 @@ if (m.quoted && m.quoted.text && m.quoted.text.includes("====「 𝐕𝐈𝐃�
 }
 
 // bby2 
-const bbyCmd = require('./commands/bby');
+    // bby2
+    const bbyCmd = require('./commands/bby');
 
-// Check message triggers (Prefix সহ বা ছাড়া)
-if (m.text) {
-  const textLower = m.text.trim().toLowerCase();
-  const triggers = ['bby', 'jan', 'baby', 'shona', 'ai', '.bby', '.jan', '.baby', '.shona', '.ai'];
-  
-  const isTriggered = triggers.some(trig => textLower === trig || textLower.startsWith(trig + ' '));
+    // Check message triggers (Prefix সহ বা ছাড়া)
+    if (m.text) {
+        const textLower = m.text.trim().toLowerCase();
+        const triggers = ['bby', 'jan', 'baby', 'shona', 'ai', '.bby', '.jan'];
 
-  if (isTriggered) {
-    const firstWord = textLower.split(' ')[0];
-    const args = m.text.trim().split(' ').slice(1);
-    
-    await bbyCmd.exec(bad, m, {
-      args: args,
-      prefix: firstWord.startsWith('.') ? '.' : '',
-      isAdmins,
-      isCreator
-    });
-  }
-}
+        const isTriggered = triggers.some(trig => textLower === trig || textLower.startsWith(trig + ' '));
 
-// cpl pic
-const coupleCmd = require('./commands/couple');
+        if (isTriggered) {
+            const firstWord = textLower.split(' ')[0];
+            const args = m.text.trim().split(' ').slice(1);
 
-if (m.text && (m.text.startsWith('.couple') || m.text.startsWith('.love') || m.text.startsWith('.jora') || m.text.startsWith('.pair'))) {
-  await coupleCmd.exec(bad, m, {
-    args: m.text.split(' ').slice(1),
-    prefix: m.text[0] || '.',
-    isAdmins,
-    isCreator
-  });
+            await bbyCmd.exec(bad, m, {
+                args: args,
+                prefix: firstWord.startsWith('.') ? '.' : '',
+                isAdmin: isAdmin,
+                isCreator: isCreator
+            });
+        }
+    } // <-- এই ব্র্যাকেটটা মিসিং ছিল!
+
+    // rpl pix / couple
+    const coupleCmd = require('./commands/couple');
+
+    if (m.text && (m.text.startsWith('.couple') || m.text.startsWith('.love'))) { // <-- ব্র্যাকেট ফিক্সড
+        await coupleCmd.exec(bad, m, {
+            args: m.text.split(' ').slice(1),
+            prefix: m.text[0] || '.',
+            isAdmin: isAdmin,
+            isCreator: isCreator
+        });
     }
+
 if (getSetting(m.chat, "autoReact", false)) {
     const emojis = [
         "😁", "😂", "🤣", "😃", "😄", "😅", "😆", "😉", "😊",
