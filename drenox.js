@@ -1181,17 +1181,8 @@ if (m.text && (m.text.startsWith('.menu3') || m.text.startsWith('.menu') || m.te
         prefix: m.text[0] || '.'
     });
 }
-// BotSettings Connection
-const botsettings = require('./commands/botsettings');
 
-if (m.text && (m.text.startsWith('.setbotname') || m.text.startsWith('.setname') || m.text.startsWith('.setbotpic') || m.text.startsWith('.setbotpp') || m.text.startsWith('.setpp') || m.text.startsWith('.setbotinfo') || m.text.startsWith('.setbio'))) {
-  await botsettings.exec(bad, m, {
-    args: m.text.split(' ').slice(1),
-    prefix: m.text[0] || '.',
-    
-    isCreator
-  });
-}
+
     // Namaz Auto Connection
     const namaz = require('./commands/namaz')
 
