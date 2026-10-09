@@ -6653,17 +6653,107 @@ case 'song': {
 
         // 🗑️ লোডিং মেসেজ ডিলিট
         try {
+case 'play':
+case 'play2':
+case 'song': {
+    const axios = require("axios");
+    const yts = require("yt-search");
+
+    const keyword = text || args.join(" ");
+
+    if (!keyword) {
+        return bad.sendMessage(m.chat, {
+            text: `╭──◆「 *PLAY2 COMMAND* 」◆\n` +
+                  `├\n` +
+                  `├◇ ⚠️ Please provide a song name.\n` +
+                  `├◇ 💡 Example: ${prefix}play2 pal pal\n` +
+                  `├\n` +
+                  `╰─┬─★─☆─♪♪─◆\n\n` +
+                  `╭──◆「 *FAHIM BBZ* 」◆\n` +
+                  `╰───★─☆─♪♪─◆`,
+        }, { quoted: m });
+    }
+
+    const LOADING_FRAMES = [
+        '⚡ Loading Audio... [▰▱▱▱▱▱▱▱▱▱]',
+        '⚡ Fetching Server... [▰▰▱▱▱▱▱▱▱▱]',
+        '⚡ Processing Song... [▰▰▰▱▱▱▱▱▱▱]',
+        '⚡ Converting MP3... [▰▰▰▰▱▱▱▱▱▱]',
+        '⚡ Downloading Track... [▰▰▰▰▰▱▱▱▱▱]',
+        '⚡ Almost Done... [▰▰▰▰▰▰▱▱▱▱]',
+        '⚡ Finalizing Audio... [▰▰▰▰▰▰▰▱▱▱]',
+        '⚡ Complete... [▰▰▰▰▰▰▰▰▰▰]'
+    ];
+
+    let loadingMsg;
+    let interval;
+
+    try {
+        // 🔍 ১. ইউটিউবে সার্চ করা
+        const searchResult = await yts(keyword);
+        if (!searchResult.videos || !searchResult.videos.length) {
+            return bad.sendMessage(m.chat, { text: "❌ No results found on YouTube." }, { quoted: m });
+        }
+
+        const video = searchResult.videos[0];
+        const title = video.title;
+        const selectedLink = video.url;
+
+        const getFormattedText = (statusText) => {
+            return `╭╼━≪••≫━╾╮\n` +
+                   `┃ 𝐅αнιм ввz мυѕι¢ 🎵\n` +
+                   `╰━━━━━━━━━━━━━━━╯\n` +
+                   `╭〔 𝘋ᴏᴡɴʟᴏᴅᴇ-ꜱᴏɴɢ 〕-━╮\n` +
+                   `**━━┈⊷*\n` +
+                   ` │ │🌸 _Title:_ *${title}*\n` +
+                   ` │ │⏳ :- *${statusText}*\n` +
+                   `*╰──────✧❁✧──────◆*\n` +
+                   ` ╭──◆「 *FAHIM BBZ* 」◆\n` +
+                   ` ╰───★─☆─♪♪─◆`;
+        };
+
+        // 🔍 লোডিং মেসেজ পাঠানো
+        loadingMsg = await bad.sendMessage(m.chat, {
+            text: getFormattedText(LOADING_FRAMES[0]),
+        }, { quoted: m });
+
+        // ⏳ প্রোগ্রেস বার এনিমেশন আপডেট
+        let frame = 1;
+        interval = setInterval(async () => {
+            try {
+                if (frame < LOADING_FRAMES.length) {
+                    const frameText = getFormattedText(LOADING_FRAMES[frame]);
+                    await bad.sendMessage(m.chat, { edit: loadingMsg.key, text: frameText });
+                    frame++;
+                }
+            } catch (e) {}
+        }, 1200);
+
+        // 📥 KnightBot API থেকে ডাউনলোড লিংক বের করা
+        const apiUrl = `https://knightbotapi.stream/api/download/ytaudio?apikey=knight&format=128kbps&url=${encodeURIComponent(selectedLink)}`;
+        const response = await axios.get(apiUrl);
+
+        if (!response.data || !response.data.success || !response.data.result || !response.data.result.download) {
+            throw new Error("KnightBot API download url return koreni");
+        }
+
+        const audioUrl = response.data.result.download;
+
+        if (interval) clearInterval(interval);
+
+        // 🗑️ লোডিং মেসেজ ডিলিট
+        try {
             await bad.sendMessage(m.chat, {
                 delete: loadingMsg.key
             });
         } catch (e) {}
 
-        // 🎵 অডিও মেসেজ সেন্ড
+        // 🎵 সরাসরি নাইটবটের অডিও ফাইল ইউআরএল দিয়ে মেসেজ সেন্ড
         await bad.sendMessage(
             m.chat,
             {
-                audio: { url: filePath },
-                mimetype: "audio/mpeg",
+                audio: { url: audioUrl },
+                mimetype: "audio/mp4",
                 fileName: `${title} - FAHIM BBZ.mp3`,
                 caption: `╭╼━≪••≫━╾╮\n` +
                          `┃ 𝐅αнιм ввz мυѕι¢ 🎵\n` +
@@ -6673,14 +6763,11 @@ case 'song': {
             { quoted: m }
         );
 
-        // 🧹 টেম্পোরারি ফাইল ক্লিনআপ
-        if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-
     } catch (error) {
         if (interval) clearInterval(interval);
         console.error("❌ Error in play command:", error);
 
-        const failText = `❌ Failed to play the song. Try again later.`;
+        const failText = `❌ Failed to play the song. Try again later.\nError: ${error.message}`;
         if (loadingMsg) {
             try {
                 await bad.sendMessage(m.chat, { edit: loadingMsg.key, text: failText });
@@ -6693,6 +6780,7 @@ case 'song': {
     }
 }
 break;
+
 
 
 
