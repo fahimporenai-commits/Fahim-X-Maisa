@@ -69,49 +69,38 @@ module.exports = {
       const chatId = m.chat;
       const sender = m.sender || m.key.participant;
 
-      // ১. বটের নিজস্ব ওয়াটসঅ্যাপ নম্বর নিখুঁতভাবে বের করা
-      const botNum = (bad.user?.id || bad.user?.jid || "").split(':')[0].split('@')[0];
+      // ১. বটের নিজের JID (ID) বের করা
+      const botJid = bad.user.id ? bad.user.id.split(':')[0] + '@s.whatsapp.net' : bad.user.jid;
 
-      // ২. রিপ্লাই দেওয়া মেসেজের তথ্য নেওয়া
-      const quotedMsg = m.quoted || (m.message && m.message.extendedTextMessage && m.message.extendedTextMessage.contextInfo);
-      
-      let isReplyToBot = false;
-      if (quotedMsg && botNum) {
-        const quotedSender = (quotedMsg.participant || quotedMsg.sender || quotedMsg.key?.participant || "").split('@')[0];
-        // রিপ্লাইকৃত মেসেজটি বটের নিজস্ব কি না তা যাচাই
-        if (quotedSender === botNum || quotedMsg.fromMe === true) {
-          isReplyToBot = true;
-        }
-      }
+      // ২. রিপ্লাই করা মেসেজের প্রেরক (Participant) বটের নিজের কি না তা নিখুঁতভাবে চেক করা
+      const contextInfo = m.message?.extendedTextMessage?.contextInfo || m.quoted;
+      const quotedParticipant = contextInfo?.participant || contextInfo?.sender || m.quoted?.sender;
 
-      const startsWithTrigger = text.startsWith("bot ") || text.startsWith("বট ");
+      const isReplyToBot = quotedParticipant && (
+        quotedParticipant.split(':')[0] === botJid.split(':')[0]
+      );
 
-      // ৩. শুধুমাত্র বটের মেসেজে রিপ্লাই দিলে বা 'bot [কথা]' লিখলে AI উত্তর দেবে
-      if (isReplyToBot || startsWithTrigger) {
-        let queryText = m.text;
-        if (startsWithTrigger) {
-          queryText = m.text.replace(/^(bot|বট)\s+/i, "");
-        }
-
-        const apis = await axios.get("https://raw.githubusercontent.com/MOHAMMAD-NAYAN-OFFICIAL/Nayan/main/api.json");
-        const apiss = apis.data.api;
-
-        const response = await axios.get(
-          `${apiss}/sim?type=ask&ask=${encodeURIComponent(queryText)}&number=${sender.split('@')[0]}`
-        );
-
-        const replyText = response.data?.data?.msg || "🤖 বুঝতে পারিনি!";
-        return await bad.sendMessage(chatId, { text: replyText }, { quoted: m });
-      }
-
-      // ৪. শুধু 'bot' বা 'বট' লিখলে র্যান্ডম গ্রিটিং দেবে
+      // ৩. শুধু 'bot', 'বট' ইত্যাদি সিঙ্গেল ট্রিগার লিখলে র্যান্ডম গ্রিটিং দেবে
       const singleTriggers = ["bot", "বট", "jan", "জান", "sona", "সোনা"];
-      if (singleTriggers.includes(text)) {
+      if (singleTriggers.includes(text) && !isReplyToBot) {
         const randomGreeting = greetings[Math.floor(Math.random() * greetings.length)];
         return await bad.sendMessage(chatId, {
           text: `@${sender.split('@')[0]}, ${randomGreeting}`,
           mentions: [sender],
         }, { quoted: m });
+      }
+
+      // ৪. শুধুমাত্র বটের পাঠানো মেসেজে রিপ্লাই দিলেই AI কথোপকথন চালাবে
+      if (isReplyToBot) {
+        const apis = await axios.get("https://raw.githubusercontent.com/MOHAMMAD-NAYAN-OFFICIAL/Nayan/main/api.json");
+        const apiss = apis.data.api;
+
+        const response = await axios.get(
+          `${apiss}/sim?type=ask&ask=${encodeURIComponent(m.text)}&number=${sender.split('@')[0]}`
+        );
+
+        const replyText = response.data?.data?.msg || "🤖 বুঝতে পারিনি!";
+        return await bad.sendMessage(chatId, { text: replyText }, { quoted: m });
       }
 
     } catch (e) {
