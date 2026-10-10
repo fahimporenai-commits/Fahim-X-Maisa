@@ -4069,6 +4069,7 @@ case 'add': {
 }
 break
 
+                    
 case 'groupstatus':
 case 'gcstatus':
 case 'poststatus': {
@@ -4083,13 +4084,16 @@ case 'poststatus': {
 
         const quotedMsg = m.quoted;
         const mime = (quotedMsg.msg || quotedMsg).mimetype || '';
-        const isAll = args[0]?.toLowerCase() === 'all';
+        
+        // 🔍 মেসেজ টেক্সটের ভেতর 'all' আছে কি না সরাসরি চেক করা (args নির্ভরতা বাদ)
+        const fullText = (m.text || '').toLowerCase();
+        const isAll = fullText.includes('all');
 
-        // target JIDs list তৈরি করা (all দিলে সব গ্রুপ, না দিলে বর্তমান গ্রুপ)
+        // Target JIDs list তৈরি করা
         let targetChats = [];
 
         if (isAll) {
-            // বটের সব যুক্ত হওয়া গ্রুপ বের করা
+            // বটের যুক্ত হওয়া সব গ্রুপ বের করা
             const getGroups = await bad.groupFetchAllParticipating();
             targetChats = Object.keys(getGroups);
             if (targetChats.length === 0) return reply('❌ Bot kono group-e যুক্ত nei!');
@@ -4173,7 +4177,7 @@ case 'poststatus': {
         }
 
         await bad.sendMessage(m.chat, { react: { text: '✅', key: m.key } });
-        reply(`📢 *Group Status*\n\n✅ Status posted successfully ${isAll ? `to ${targetChats.length} groups!` : 'to this group!'}`);
+        reply(`🌚 *𝘎𝘙𝘖𝘜𝘗-𝘚𝘛𝘈𝘛𝘜𝘚--*\n\n✅ρσѕтє∂ 𝘴uccessfully ${isAll ? `to ${targetChats.length} groups!` : 'to this group!'}`);
 
     } catch (error) {
         console.error('Group Status Error:', error);
