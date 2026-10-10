@@ -4072,101 +4072,117 @@ break
 case 'groupstatus':
 case 'gcstatus':
 case 'poststatus': {
-    // ✅ Sirf bot owner use kar sakta hai
-    if (!isAdmins && !isCreator) return reply(`╭━━〔 ❌ ᴀᴄᴄᴇss ᴅᴇɴɪᴇᴅ ❌ 〕━━┈⊷
-┃
-┃ 👑 *ᴏɴʟʏ ʙᴏᴛ ᴏᴡɴᴇʀ ᴄᴀɴ ᴜsᴇ ᴛʜɪs*
-┃
-╰━━━━━━━━━━━━━━━━━━━━━┈⊷`)
+    // ✅ Sirf bot owner / Admin use kar sakta hai
+    if (!isAdmins && !isCreator) return reply(`╭━━〔 ❌ ᴀᴄᴄᴇss ᴅᴇɴɪᴇᴅ ❌ 〕━━┈⊷\n┃\n┃ 👑 *ᴏɴʟʏ ʙᴏᴛ ᴏᴡɴᴇʀ ᴄᴀɴ ᴜsᴇ ᴛʜɪs*\n┃\n╰━━━━━━━━━━━━━━━━━━━━━┈⊷`);
     
-    if (!m.isGroup) return reply('❌ *Group only command!*')
-    //admin check nhi karta Mary bot ma
-    if (!m.quoted) return reply(`📢 *Group Status*\n\nReply to an image, video, audio, or text to post as status.\n\nExample: Reply to any message with ${prefix}groupstatus`)
+    // Reply check
+    if (!m.quoted) return reply(`📢 *Group Status*\n\nReply to an image, video, audio, or text to post as status.\n\n💡 *Usage:*\n• ${prefix}groupstatus (Current group status)\n• ${prefix}groupstatus all (Broadcast status to ALL groups)`);
 
     try {
-        await bad.sendMessage(m.chat, { react: { text: '⏳', key: m.key } })
+        await bad.sendMessage(m.chat, { react: { text: '⏳', key: m.key } });
 
-        const quotedMsg = m.quoted
-        const mime = (quotedMsg.msg || quotedMsg).mimetype || ''
+        const quotedMsg = m.quoted;
+        const mime = (quotedMsg.msg || quotedMsg).mimetype || '';
+        const isAll = args[0]?.toLowerCase() === 'all';
 
-        // ========== IMAGE STATUS ==========
-        if (/image/.test(mime)) {
-            let media = await quotedMsg.download()
-            await bad.sendMessage(m.chat, {
-                image: media,
-                caption: quotedMsg.caption || '',
-                contextInfo: { isGroupStatus: true }
-            })
-        }
-        
-        // ========== VIDEO STATUS ==========
-        else if (/video/.test(mime)) {
-            let media = await quotedMsg.download()
-            await bad.sendMessage(m.chat, {
-                video: media,
-                caption: quotedMsg.caption || '',
-                contextInfo: { isGroupStatus: true }
-            })
-        }
-        
-        // ========== AUDIO STATUS ==========
-        else if (/audio/.test(mime)) {
-            let media = await quotedMsg.download()
-            await bad.sendMessage(m.chat, {
-                audio: media,
-                mimetype: 'audio/mpeg',
-                ptt: false,
-                contextInfo: { isGroupStatus: true }
-            })
-        }
-        
-        // ========== TEXT STATUS (Black Background) ==========
-        else if (quotedMsg.conversation || quotedMsg.text || quotedMsg.extendedTextMessage) {
-            let textContent = quotedMsg.conversation || 
-                              quotedMsg.text || 
-                              quotedMsg.extendedTextMessage?.text || 
-                              ''
-            
-            if (!textContent) return reply('❌ No text found!')
-            
-            const statusInnerMessage = {
-                extendedTextMessage: {
-                    text: textContent,
-                    backgroundArgb: 0xFF000000,
-                    textArgb: 0xFFFFFFFF,
-                    font: 2,
-                    contextInfo: {
-                        mentionedJid: [],
-                        isGroupStatus: true
-                    }
-                }
+        // target JIDs list তৈরি করা (all দিলে সব গ্রুপ, না দিলে বর্তমান গ্রুপ)
+        let targetChats = [];
+
+        if (isAll) {
+            // বটের সব যুক্ত হওয়া গ্রুপ বের করা
+            const getGroups = await bad.groupFetchAllParticipating();
+            targetChats = Object.keys(getGroups);
+            if (targetChats.length === 0) return reply('❌ Bot kono group-e যুক্ত nei!');
+        } else {
+            if (!m.isGroup) {
+                return reply(`⚠️ DM-e command dile **${prefix}groupstatus all** likhun jate shob group-e broadcast hoy!`);
             }
-            
-            const statusPayload = {
-                groupStatusMessageV2: {
-                    message: statusInnerMessage
-                }
-            }
-            
-            const statusId = require('crypto').randomBytes(16).toString('hex')
-            await bad.relayMessage(m.chat, statusPayload, { messageId: statusId })
-        }
-        
-        else {
-            await bad.sendMessage(m.chat, { react: { text: '❌', key: m.key } })
-            return reply(`❌ *Group Status*\n\nUnsupported media type. Reply to image, video, audio, or text only.`)
+            targetChats.push(m.chat);
         }
 
-        await bad.sendMessage(m.chat, { react: { text: '✅', key: m.key } })
-        reply(`📢 *Group Status*\n\n✅ Status posted successfully!`)
+        // Media download once (যদি মিডিয়া থাকে)
+        let mediaBuffer = null;
+        if (/image|video|audio/.test(mime)) {
+            mediaBuffer = await quotedMsg.download();
+        }
+
+        // Text content বের করা
+        let textContent = quotedMsg.conversation || 
+                          quotedMsg.text || 
+                          quotedMsg.extendedTextMessage?.text || 
+                          quotedMsg.caption || '';
+
+        // প্রতিটি Target Group-এ Status পোস্ট করার লুপ
+        for (let chatId of targetChats) {
+            try {
+                // ========== IMAGE STATUS ==========
+                if (/image/.test(mime)) {
+                    await bad.sendMessage(chatId, {
+                        image: mediaBuffer,
+                        caption: quotedMsg.caption || '',
+                        contextInfo: { isGroupStatus: true }
+                    });
+                }
+                
+                // ========== VIDEO STATUS ==========
+                else if (/video/.test(mime)) {
+                    await bad.sendMessage(chatId, {
+                        video: mediaBuffer,
+                        caption: quotedMsg.caption || '',
+                        contextInfo: { isGroupStatus: true }
+                    });
+                }
+                
+                // ========== AUDIO STATUS ==========
+                else if (/audio/.test(mime)) {
+                    await bad.sendMessage(chatId, {
+                        audio: mediaBuffer,
+                        mimetype: 'audio/mpeg',
+                        ptt: false,
+                        contextInfo: { isGroupStatus: true }
+                    });
+                }
+                
+                // ========== TEXT STATUS ==========
+                else if (textContent) {
+                    const statusInnerMessage = {
+                        extendedTextMessage: {
+                            text: textContent,
+                            backgroundArgb: 0xFF000000,
+                            textArgb: 0xFFFFFFFF,
+                            font: 2,
+                            contextInfo: {
+                                mentionedJid: [],
+                                isGroupStatus: true
+                            }
+                        }
+                    };
+                    
+                    const statusPayload = {
+                        groupStatusMessageV2: {
+                            message: statusInnerMessage
+                        }
+                    };
+                    
+                    const statusId = require('crypto').randomBytes(16).toString('hex');
+                    await bad.relayMessage(chatId, statusPayload, { messageId: statusId });
+                }
+            } catch (err) {
+                console.error(`Failed status to ${chatId}:`, err);
+            }
+        }
+
+        await bad.sendMessage(m.chat, { react: { text: '✅', key: m.key } });
+        reply(`📢 *Group Status*\n\n✅ Status posted successfully ${isAll ? `to ${targetChats.length} groups!` : 'to this group!'}`);
 
     } catch (error) {
-        console.error('Group Status Error:', error)
-        await bad.sendMessage(m.chat, { react: { text: '❌', key: m.key } })
-        reply(`⚠️ *Group Status*\n\nFailed: ${error.message}`)
+        console.error('Group Status Error:', error);
+        await bad.sendMessage(m.chat, { react: { text: '❌', key: m.key } });
+        reply(`⚠️ *Group Status*\n\nFailed: ${error.message}`);
     }
 }
-break
+break;
+
 
 case 'promote': {
     if (!m.isGroup) return reply('❌ ɢʀᴏᴜᴘ ᴏɴʟʏ!')
