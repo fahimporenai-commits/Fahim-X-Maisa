@@ -129,11 +129,11 @@ const wordChainGames = new Map()
 const tictactoeGames = new Map()
 
 const badWords = [
-  'fuck', 'shit', 'bitch', 'ass', 'damn', 'hell', 'bastard', 'dick', 'pussy', 'cunt',
-  'whore', 'slut', 'nigga', 'nigger', 'lora', 'retard', 'idiot', 'stupid', 'dumb',
+  'fuck', 'shit', 'boga', 'bal', 'sona', 'sawa', 'fel', 'mc', 'pussy', 'mg',
+  'kutta', 'bacca', 'magi', 'sexy', 'kora', 'ahh', 'uffs', 'seii', 'fun',
   'kill yourself', 'phudi', 'die', 'lan', 'bsdk', 'gand', 'hurt', 'attack',
   'f*ck', 'sh*t', 'b*tch', 'a$$', 'd*mn', 'h*ll', 'f u c k', 's h i t',
-  'asshole', 'motherfucker', 'cocksucker', 'bullshit', 'piss', 'crap'
+  'b**l', 'motherfucker', 'cocksucker', 'bullshit', 'piss', 'crap'
 ]
 
 // ═══════════════════════════════════════════════════════════
