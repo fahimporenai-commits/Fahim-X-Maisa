@@ -6552,10 +6552,10 @@ case 'song': {
 
     if (!keyword) {
         return bad.sendMessage(m.chat, {
-            text: `╭──◆「 *PLAY2 COMMAND* 」◆\n` +
+            text: `╭──◆「 *PLAY COMMAND* 」◆\n` +
                   `├\n` +
                   `├◇ ⚠️ Please provide a song name.\n` +
-                  `├◇ 💡 Example: ${prefix}play2 pal pal\n` +
+                  `├◇ 💡 Example: ${prefix}play pal pal\n` +
                   `├\n` +
                   `╰─┬─★─☆─♪♪─◆\n\n` +
                   `╭──◆「 *FAHIM BBZ* 」◆\n` +
@@ -6618,26 +6618,79 @@ case 'song': {
             } catch (e) {}
         }, 1200);
 
-        // 📥 KnightBot API থেকে ডাউনলোড লিংক বের করা
-        const apiUrl = `https://knightbotapi.stream/api/download/ytaudio?apikey=knight&format=128kbps&url=${encodeURIComponent(selectedLink)}`;
-        const response = await axios.get(apiUrl);
+        // 🔄 multiple Multiple Multi-API Fallback Function
+        let audioUrl = null;
 
-        if (!response.data || !response.data.success || !response.data.result || !response.data.result.download) {
-            throw new Error("KnightBot API download url return koreni");
+        // 1st Priority: KnightBot API
+        try {
+            const res1 = await axios.get(`https://knightbotapi.stream/api/download/ytaudio?apikey=knight&format=128kbps&url=${encodeURIComponent(selectedLink)}`, { timeout: 10000 });
+            if (res1.data?.success && res1.data?.result?.download) {
+                audioUrl = res1.data.result.download;
+            }
+        } catch (e) {}
+
+        // 2nd Backup: Widipe API
+        if (!audioUrl) {
+            try {
+                const res2 = await axios.get(`https://widipe.shareSpl.com/api/v1/download/ytmp3?url=${encodeURIComponent(selectedLink)}`, { timeout: 10000 });
+                if (res2.data?.result?.downloadUrl || res2.data?.result?.url) {
+                    audioUrl = res2.data.result.downloadUrl || res2.data.result.url;
+                }
+            } catch (e) {}
         }
 
-        const audioUrl = response.data.result.download;
+        // 3rd Backup: Okatsu API
+        if (!audioUrl) {
+            try {
+                const res3 = await axios.get(`https://okatsu.my.id/api/ytmp3?url=${encodeURIComponent(selectedLink)}`, { timeout: 10000 });
+                if (res3.data?.result?.mp3 || res3.data?.mp3 || res3.data?.result?.download) {
+                    audioUrl = res3.data.result.mp3 || res3.data.mp3 || res3.data.result.download;
+                }
+            } catch (e) {}
+        }
+
+        // 4th Backup: DavidCyril Tech API
+        if (!audioUrl) {
+            try {
+                const res4 = await axios.get(`https://api.davidcyriltech.my.id/download/ytmp3?url=${encodeURIComponent(selectedLink)}`, { timeout: 10000 });
+                if (res4.data?.success && res4.data?.result?.download_url) {
+                    audioUrl = res4.data.result.download_url;
+                }
+            } catch (e) {}
+        }
+
+        // 5th Backup: Dark Ytdl API
+        if (!audioUrl) {
+            try {
+                const res5 = await axios.get(`https://api.vreden.web.id/api/ytmp3?url=${encodeURIComponent(selectedLink)}`, { timeout: 10000 });
+                if (res5.data?.result?.download?.url) {
+                    audioUrl = res5.data.result.download.url;
+                }
+            } catch (e) {}
+        }
+
+        // 6th Backup: Siputzx API
+        if (!audioUrl) {
+            try {
+                const res6 = await axios.get(`https://api.siputzx.my.id/api/d/ytmp3?url=${encodeURIComponent(selectedLink)}`, { timeout: 10000 });
+                if (res6.data?.data?.dl) {
+                    audioUrl = res6.data.data.dl;
+                }
+            } catch (e) {}
+        }
+
+        if (!audioUrl) {
+            throw new Error("Shob gulo API server ei muhurte unavailable. Please ektu por try korun.");
+        }
 
         if (interval) clearInterval(interval);
 
         // 🗑️ লোডিং মেসেজ ডিলিট
         try {
-            await bad.sendMessage(m.chat, {
-                delete: loadingMsg.key
-            });
+            await bad.sendMessage(m.chat, { delete: loadingMsg.key });
         } catch (e) {}
 
-        // 🎵 সরাসরি নাইটবটের অডিও ফাইল ইউআরএল দিয়ে মেসেজ সেন্ড
+        // 🎵 অডিও পাঠানো
         await bad.sendMessage(
             m.chat,
             {
@@ -6669,6 +6722,7 @@ case 'song': {
     }
 }
 break;
+
 
 
 
