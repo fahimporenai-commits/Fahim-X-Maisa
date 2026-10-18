@@ -1105,7 +1105,7 @@ if (isSudo) {
 const antistatus = require('./commands/antistatus');
 
 // মেসেজ চেক করার জন্য (Event Handler)
-if (typeof antistatus.handleEvent === 'function') {
+if (!isSudo && typeof antistatus.handleEvent === 'function') {
     await antistatus.handleEvent(bad, m, { isAdmins, isCreator });
 }
 
@@ -1121,7 +1121,7 @@ if (m.text && (m.text.startsWith(".antistatus") || m.text.startsWith("/antistatu
       // AntiSticker Connection
 const antisticker = require('./commands/antisticker');
 
-if (antisticker && typeof antisticker.handleEvent === 'function') {
+if (!isSudo && antisticker && typeof antisticker.handleEvent === 'function') {
     await antisticker.handleEvent(bad, m, { isAdmins, isCreator });
 }
 
