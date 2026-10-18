@@ -1,6 +1,6 @@
 module.exports = {
   name: "info",
-  alias: ["about", "owner", "admininfo"],
+  alias: ["about", "intro", "admininfo"],
   category: "Utilities",
   desc: "Show owner and bot info.",
 
@@ -33,7 +33,7 @@ module.exports = {
       await bad.sendMessage(
         chatId,
         {
-          image: { url: "https://i.postimg.cc/k5MLZmVs/IMG-6272.jpg" },
+          image: { url: "https://i.postimg.cc/HLrXC065/IMG-20260425-111124.jpg" },
           caption: infoMessage
         },
         { quoted: m }
