@@ -1,46 +1,58 @@
-// Saved lines store korar global storage
-global.savedLines = global.savedLines || [];
+// Global memory store for cross-chat data access
+const savedLinesDb = {};
 
 module.exports = {
-    name: "saveline",
-    alias: ["linesave", "addlines"],
-    category: "Utility",
-    desc: "Song line-gulo bot-er inbox-e save korar jonno",
+    name: 'saveline',
+    alias: ['sl', 'savelines'],
+    description: 'Save lines using user ID for cross-chat access',
+    
+    // Export object so setline.js can read this
+    savedLinesDb,
 
-    exec: async (bad, m, { args, prefix }) => {
+    async exec(bad, m, { args, prefix }) {
         try {
-            const text = args.join(" ");
+            const sender = m.sender; // 🔑 m.chat er bodol-e user ID (m.sender) use kora hoise
+
+            // 1. Text check
+            const text = args.join(' ') || (m.quoted ? (m.quoted.text || m.quoted.caption) : '');
+
             if (!text) {
-                return await bad.sendMessage(m.chat, { 
-                    text: `⚠️ *Line format bhul hoyeche!*\n\n💡 *Example:*
-${prefix}saveline
-1. Ami tomake bhalobashi
-2. Tumi amar moner manush
-3. Ekta Shundor Shondha` 
+                return await bad.sendMessage(m.chat, {
+                    text: `⚠️ *Please provide lines to save!*\n\n💡 *Example:*\n${prefix}saveline 1. KAHO HO MERY JAN\n2. TUMKO MISS KARTI HUU\n3. HEY BBY`
                 }, { quoted: m });
             }
 
-            // Line gulo split kore array te neowa (New line ba 1. 2. diye split)
-            const rawLines = text.split('\n').filter(line => line.trim() !== '');
-            
-            global.savedLines = rawLines.map(line => {
-                // Line er shuru te thaka number (e.g. "1. ", "2) ") muche dewya
-                return line.replace(/^\d+[\.\)\-]\s*/, '').trim();
+            // 2. Numbering format system spliting (1. 2. 3. format)
+            let lines = text.split(/\d+\.\s*/).map(l => l.trim()).filter(l => l.length > 0);
+
+            // Back-up split if no numbers used (line break split)
+            if (lines.length <= 1 && text.includes('\n')) {
+                lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+            }
+
+            if (lines.length === 0) {
+                return await bad.sendMessage(m.chat, {
+                    text: `⚠️ *No valid lines found!* Please use standard numbering (1. line 2. line).`
+                }, { quoted: m });
+            }
+
+            // 3. Save array using Sender ID
+            savedLinesDb[sender] = lines;
+
+            // 4. Response Message Format
+            let responseText = `✅ *Total ${lines.length} ti line successfully save hoyeche!*\n\n`;
+            lines.forEach((line, index) => {
+                responseText += `*Line ${index + 1}:* ${line}\n`;
             });
 
-            await bad.sendMessage(m.chat, { react: { text: '✅', key: m.key } });
-            
-            let confirmationMsg = `✅ *Total ${global.savedLines.length} ti line successfully save hoyeche!*\n\n`;
-            global.savedLines.forEach((l, index) => {
-                confirmationMsg += `*Line ${index + 1}:* ${l}\n`;
-            });
-            confirmationMsg += `\n> Ekhon group-e poll-er reply diiye \`${prefix}setline yes\` ba \`${prefix}setline no\` likhun!`;
+            responseText += `\n*Ekhon group-e poll-er reply diiye ${prefix}setline yes ba ${prefix}setline no likhun!*`;
 
-            return await bad.sendMessage(m.chat, { text: confirmationMsg }, { quoted: m });
+            await bad.sendMessage(m.chat, { text: responseText }, { quoted: m });
 
         } catch (error) {
-            console.error("SaveLine Command Error:", error);
-            return await bad.sendMessage(m.chat, { text: "❌ Line save korte kono somossha hoyeche!" }, { quoted: m });
+            console.error('Saveline Error:', error);
+            await bad.sendMessage(m.chat, { text: `❌ Saveline error: ${error.message}` }, { quoted: m });
         }
     }
 };
+
