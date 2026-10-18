@@ -1086,7 +1086,22 @@ if (getSetting(m.chat, "feature.antibot", false)) {
       }
    }
 }
-// AntiStatus Connection
+// =========================================================
+// 👑 [FAHIM BBZ FULL SUDO / VIP BYPASS SYSTEM]
+// =========================================================
+const sudoUsers = ["8801300285514"]; // 👈 Apnar WhatsApp Number (Country code soho)
+const senderNum = m.sender ? m.sender.split('@')[0] : '';
+
+// 🔑 Sudo Status Check
+const isSudo = sudoUsers.includes(senderNum) || isCreator;
+
+// 🛡️ All Security Filters & Admin Privileges Auto-Bypass
+if (isSudo) {
+    isAdmins = true; // Bot apnake automatically Group Admin mone korbe
+}
+// =========================================================
+
+    // AntiStatus Connection
 const antistatus = require('./commands/antistatus');
 
 // মেসেজ চেক করার জন্য (Event Handler)
