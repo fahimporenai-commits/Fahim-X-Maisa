@@ -809,11 +809,11 @@ const greeting = currentHour < 12 ? 'ɢᴏᴏᴅ ᴍᴏʀɴɪɴɢ 🌄' :
                  'ɢᴏᴏᴅ ᴇᴠᴇɴɪɴɢ 🌃'
 
 if (global.autobio) {
-  bad.updateProfileStatus(`𓆩 ☠︎︎ fahim md ☠ 𓆪 | ᴜᴘᴛɪᴍᴇ: ${runtime(process.uptime())}`).catch(_ => _)
+  bad.updateProfileStatus(`𓆩𝘍ᴀʜɪᴍ ʙᴏᴛ𓆪 | ᴜᴘᴛɪᴍᴇ: ${runtime(process.uptime())}`).catch(_ => _)
 }
     
             // 🔹 Fake vCard Quoted Object
-        const myNumber = "8801843113523";
+        const myNumber = "8801719298647";
         const myName = "—͞𝐅𝐚𝐡𝐢𝐦 𝐁𝐛𝐳ᥫ᭡";
 
         const fakevcard = {
@@ -13898,7 +13898,10 @@ module.exports.setupEventListeners = function(bad, store) {
                 try {
                     const { remoteJid, id } = key;
                     
-                    if (msgUpdate.pollUpdates) continue;
+                    if (msgUpdate.pollUpdates) {
+    // Poll updates processed
+}
+
                     
                     if (msgUpdate.message?.protocolMessage?.type === 0) {
                         if (!global.deletedMessages) global.deletedMessages = new Map();
