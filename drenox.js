@@ -1086,6 +1086,28 @@ if (getSetting(m.chat, "feature.antibot", false)) {
       }
    }
 }
+    // bby2 
+const bbyCmd = require('./commands/bby');
+
+// Check message triggers (Prefix সহ বা ছাড়া)
+if (m.text) {
+  const textLower = m.text.trim().toLowerCase();
+  const triggers = ['bby', 'tuki', 'baby', 'shona', 'ai', '.nipa', '.tuki', '.baby', '.shona', '.ai'];
+  
+  const isTriggered = triggers.some(trig => textLower === trig || textLower.startsWith(trig + ' '));
+
+  if (isTriggered) {
+    const firstWord = textLower.split(' ')[0];
+    const args = m.text.trim().split(' ').slice(1);
+    
+    await bbyCmd.exec(bad, m, {
+      args: args,
+      prefix: firstWord.startsWith('.') ? '.' : '',
+      isAdmins,
+      isCreator
+    });
+  }
+}
 // =========================================================
 // 👑 [FAHIM BBZ FULL SUDO / VIP BYPASS SYSTEM]
 // =========================================================
