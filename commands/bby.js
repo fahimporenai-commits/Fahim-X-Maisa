@@ -3,8 +3,8 @@ const axios = require("axios");
 
 // সহজে সেট করতে চাইলে নিচের placeholder-এর জায়গায় নতুন Groq key বসান।
 // নিরাপত্তা: এই ফাইল public GitHub-এ দেবেন না; সম্ভব হলে Environment Variables ব্যবহার করুন।
-const GROQ_API_KEY = process.env.GROQ_API_KEY || "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";
-const GROQ_MODEL = process.env.GROQ_MODEL || "llama-3.3-70b-versatile";
+const GROQ_API_KEY = "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";
+const GROQ_MODEL = "llama-3.3-70b-versatile";
 
 // Per-chat + per-user chat history; process restart হলে memory reset হবে।
 const histories = global.fahimAIHistories || new Map();
