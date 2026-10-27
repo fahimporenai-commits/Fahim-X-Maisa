@@ -6581,7 +6581,7 @@ break;
 // ══════════════════════════════════════════════════════════
    // ==================== PLAY2 / MUSIC COMMAND =====
 
-case 'play':
+    case 'play':
 case 'play2':
 case 'song':
 case 'video':
@@ -6609,7 +6609,7 @@ case 'ytmp4': {
     const UA = { "User-Agent": "Mozilla/5.0" };
     const e = encodeURIComponent;
 
-    async function gmdBuffer(url) {
+    const gmdBuffer = async (url) => {
         const res = await axios.get(url, {
             responseType: "arraybuffer",
             maxRedirects: 10,
@@ -6617,7 +6617,7 @@ case 'ytmp4': {
             headers: UA,
         });
         return Buffer.from(res.data);
-    }
+    };
 
     const formatAudio = async (buf) => buf;
     const formatVideo = async (buf) => buf;
@@ -6625,7 +6625,7 @@ case 'ytmp4': {
     const isMp4 = (b) => b.length > 12 && b.slice(4, 8).toString("latin1") === "ftyp";
     const isValidMedia = (buf, type) => isValidBuffer(buf) && (type !== "video" || isMp4(buf));
 
-    function extractVideoId(input) {
+    const extractVideoId = (input) => {
         const short = input.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/);
         if (short) return short[1];
         const watch = input.match(/[?&]v=([a-zA-Z0-9_-]{11})/);
@@ -6633,9 +6633,9 @@ case 'ytmp4': {
         const shorts = input.match(/youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/);
         if (shorts) return shorts[1];
         return null;
-    }
+    };
 
-    function extractButtonId(msg) {
+    const extractButtonId = (msg) => {
         if (!msg) return null;
         if (msg.templateButtonReplyMessage?.selectedId) return msg.templateButtonReplyMessage.selectedId;
         if (msg.buttonsResponseMessage?.selectedButtonId) return msg.buttonsResponseMessage.selectedButtonId;
@@ -6646,12 +6646,12 @@ case 'ytmp4': {
                 try {
                     const p = JSON.parse(nf.paramsJson);
                     if (p.id) return p.id;
-                } catch (e) {}
+                } catch (err) {}
             }
             return msg.interactiveResponseMessage.buttonId || null;
         }
         return null;
-    }
+    };
 
     const APIS = {
         audio: (url) => [
@@ -6679,7 +6679,7 @@ case 'ytmp4': {
         ],
     };
 
-    function pickCandidate(data) {
+    const pickCandidate = (data) => {
         return (
             data?.audio ||
             data?.result?.mp3 ||
@@ -6697,9 +6697,9 @@ case 'ytmp4': {
             data?.result?.url ||
             (typeof data?.result === "string" ? data.result : null)
         );
-    }
+    };
 
-    async function queryAPI(ytUrl, type, exclude = []) {
+    const queryAPI = async (ytUrl, type, exclude = []) => {
         for (const api of APIS[type](ytUrl)) {
             if (exclude.includes(api.name)) continue;
             try {
@@ -6725,9 +6725,9 @@ case 'ytmp4': {
             } catch (err) {}
         }
         return { success: false, error: "All endpoints failed" };
-    }
+    };
 
-    async function getMedia(ytUrl, type) {
+    const getMedia = async (ytUrl, type) => {
         const tried = [];
         for (let i = 0; i < APIS[type](ytUrl).length; i++) {
             const r = await queryAPI(ytUrl, type, tried);
@@ -6739,9 +6739,9 @@ case 'ytmp4': {
             } catch (err) {}
         }
         return null;
-    }
+    };
 
-    async function findVideo(match) {
+    const findVideo = async (match) => {
         const id = extractVideoId(match);
         if (id) {
             const info = await yts({ videoId: id }).catch(() => null);
@@ -6749,7 +6749,7 @@ case 'ytmp4': {
         }
         const s = await yts(match);
         return s.videos[0] || null;
-    }
+    };
 
     try {
         await bad.sendMessage(m.chat, { react: { text: "🔍", key: m.key } }).catch(() => {});
@@ -6893,53 +6893,8 @@ case 'ytmp4': {
 }
 break;
 
+                                    
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-               
-
-
-                  
-    
      
     
 
