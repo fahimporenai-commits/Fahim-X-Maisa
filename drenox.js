@@ -6583,13 +6583,11 @@ break;
 
     case 'play':
 case 'play2':
-case 'song':
-case 'video':
-case 'mp4':
-case 'ytmp4': {
+case 'song': {
     const axios = require("axios");
     const yts = require("yt-search");
-    const sharp = require("sharp");
+    const fs = require("fs");
+    const path = require("path");
 
     const keyword = text || args.join(" ");
 
@@ -6606,293 +6604,173 @@ case 'ytmp4': {
         }, { quoted: m });
     }
 
-    const UA = { "User-Agent": "Mozilla/5.0" };
-    const e = encodeURIComponent;
+    // ⚡ Live Animation Loading Frames
+    const LOADING_FRAMES = [
+        '⚡ Loading Audio... [▰▱▱▱▱▱▱▱▱▱]',
+        '⚡ Fetching Server... [▰▰▱▱▱▱▱▱▱▱]',
+        '⚡ Processing Song... [▰▰▰▱▱▱▱▱▱▱]',
+        '⚡ Converting MP3... [▰▰▰▰▱▱▱▱▱▱]',
+        '⚡ Downloading Track... [▰▰▰▰▰▱▱▱▱▱]',
+        '⚡ Almost Done... [▰▰▰▰▰▰▰▱▱▱]',
+        '⚡ Finalizing Audio... [▰▰▰▰▰▰▰▰▱▱]',
+        '⚡ Complete... [▰▰▰▰▰▰▰▰▰▰]'
+    ];
 
-    const gmdBuffer = async (url) => {
-        const res = await axios.get(url, {
-            responseType: "arraybuffer",
-            maxRedirects: 10,
-            timeout: 120_000,
-            headers: UA,
-        });
-        return Buffer.from(res.data);
-    };
-
-    const formatAudio = async (buf) => buf;
-    const formatVideo = async (buf) => buf;
-    const isValidBuffer = (buf) => Buffer.isBuffer(buf) && buf.length > 10240;
-    const isMp4 = (b) => b.length > 12 && b.slice(4, 8).toString("latin1") === "ftyp";
-    const isValidMedia = (buf, type) => isValidBuffer(buf) && (type !== "video" || isMp4(buf));
-
-    const extractVideoId = (input) => {
-        const short = input.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/);
-        if (short) return short[1];
-        const watch = input.match(/[?&]v=([a-zA-Z0-9_-]{11})/);
-        if (watch) return watch[1];
-        const shorts = input.match(/youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/);
-        if (shorts) return shorts[1];
-        return null;
-    };
-
-    const extractButtonId = (msg) => {
-        if (!msg) return null;
-        if (msg.templateButtonReplyMessage?.selectedId) return msg.templateButtonReplyMessage.selectedId;
-        if (msg.buttonsResponseMessage?.selectedButtonId) return msg.buttonsResponseMessage.selectedButtonId;
-        if (msg.listResponseMessage?.singleSelectReply?.selectedRowId) return msg.listResponseMessage.singleSelectReply.selectedRowId;
-        if (msg.interactiveResponseMessage) {
-            const nf = msg.interactiveResponseMessage.nativeFlowResponseMessage;
-            if (nf?.paramsJson) {
-                try {
-                    const p = JSON.parse(nf.paramsJson);
-                    if (p.id) return p.id;
-                } catch (err) {}
-            }
-            return msg.interactiveResponseMessage.buttonId || null;
-        }
-        return null;
-    };
-
-    const APIS = {
-        audio: (url) => [
-            { name: "hector", url: `https://yt-dl.officialhectormanuel.workers.dev?url=${e(url)}` },
-            { name: "knight", url: `https://knightbotapi.stream/api/download/ytaudio?apikey=knight&format=128kbps&url=${e(url)}` },
-            { name: "prince", url: `https://api.princetechn.com/api/download/ytmp3?apikey=prince&url=${e(url)}` },
-            { name: "widipe", url: `https://widipe.shareSpl.com/api/v1/download/ytmp3?url=${e(url)}` },
-            { name: "okatsu", url: `https://okatsu.my.id/api/ytmp3?url=${e(url)}` },
-            { name: "davidcyril", url: `https://api.davidcyriltech.my.id/download/ytmp3?url=${e(url)}` },
-            { name: "vreden", url: `https://api.vreden.web.id/api/ytmp3?url=${e(url)}` },
-            { name: "siputzx", url: `https://api.siputzx.my.id/api/d/ytmp3?url=${e(url)}` },
-            { name: "kirax", url: `https://kiraxmd-api.vercel.app/api/play?query=${e(url)}` },
-            { name: "xeno", url: `https://xenoytdl-2.vercel.app/api/youtube?url=${e(url)}` },
-            { name: "jerry", url: `https://jerrycoder.oggyapi.workers.dev/down/ytmp3-v1?url=${e(url)}` },
-            { name: "elite", url: `https://eliteprotech-apis.zone.id/ytdown?format=mp3&url=${e(url)}` },
-        ],
-        video: (url) => [
-            { name: "widipe_v", url: `https://widipe.shareSpl.com/api/v1/download/ytmp4?url=${e(url)}` },
-            { name: "davidcyril_v", url: `https://api.davidcyriltech.my.id/download/ytmp4?url=${e(url)}` },
-            { name: "vreden_v", url: `https://api.vreden.web.id/api/ytmp4?url=${e(url)}` },
-            { name: "siputzx_v", url: `https://api.siputzx.my.id/api/d/ytmp4?url=${e(url)}` },
-            { name: "xeno", url: `https://xenoytdl-2.vercel.app/api/youtube?url=${e(url)}` },
-            { name: "jerry", url: `https://jerrycoder.oggyapi.workers.dev/down/ytmp4-v1?url=${e(url)}` },
-            { name: "elite", url: `https://eliteprotech-apis.zone.id/ytdown?format=mp4&url=${e(url)}` },
-        ],
-    };
-
-    const pickCandidate = (data) => {
-        return (
-            data?.audio ||
-            data?.result?.mp3 ||
-            data?.result?.mp4 ||
-            data?.result?.video ||
-            data?.result?.downloadUrl ||
-            data?.result?.download_url ||
-            data?.result?.download ||
-            data?.data?.dl ||
-            data?.data?.download ||
-            data?.data?.mp4 ||
-            data?.download ||
-            data?.url ||
-            data?.result?.audio ||
-            data?.result?.url ||
-            (typeof data?.result === "string" ? data.result : null)
-        );
-    };
-
-    const queryAPI = async (ytUrl, type, exclude = []) => {
-        for (const api of APIS[type](ytUrl)) {
-            if (exclude.includes(api.name)) continue;
-            try {
-                const res = await axios.get(api.url, { timeout: 15_000, validateStatus: () => true });
-                const candidate = pickCandidate(res.data);
-                if (!candidate || typeof candidate !== "string" || !candidate.startsWith("http")) continue;
-
-                try {
-                    const test = await axios.get(candidate, {
-                        responseType: "stream",
-                        timeout: 10_000,
-                        maxRedirects: 5,
-                        validateStatus: () => true,
-                        headers: UA,
-                    });
-                    try { test.data.destroy(); } catch (err) {}
-                    const ct = String(test.headers["content-type"] || "");
-                    if (/text|json|html/i.test(ct)) continue;
-                    if (test.status === 200 || test.status === 206) {
-                        return { success: true, download_url: candidate, endpoint: api.name };
-                    }
-                } catch (err) {}
-            } catch (err) {}
-        }
-        return { success: false, error: "All endpoints failed" };
-    };
-
-    const getMedia = async (ytUrl, type) => {
-        const tried = [];
-        for (let i = 0; i < APIS[type](ytUrl).length; i++) {
-            const r = await queryAPI(ytUrl, type, tried);
-            if (!r.success) continue;
-            tried.push(r.endpoint);
-            try {
-                const buf = await gmdBuffer(r.download_url);
-                if (isValidMedia(buf, type)) return buf;
-            } catch (err) {}
-        }
-        return null;
-    };
-
-    const findVideo = async (match) => {
-        const id = extractVideoId(match);
-        if (id) {
-            const info = await yts({ videoId: id }).catch(() => null);
-            if (info) return { ...info, url: `https://www.youtube.com/watch?v=${id}`, id };
-        }
-        const s = await yts(match);
-        return s.videos[0] || null;
-    };
+    let loadingMsg;
+    let interval;
 
     try {
-        await bad.sendMessage(m.chat, { react: { text: "🔍", key: m.key } }).catch(() => {});
-        
-        const firstVideo = await findVideo(keyword.trim());
-        if (!firstVideo) {
-            await bad.sendMessage(m.chat, { react: { text: "❌", key: m.key } }).catch(() => {});
-            return bad.sendMessage(m.chat, { text: "❌ No video found for your query." }, { quoted: m });
+        const getFormattedText = (songTitle, statusText) => {
+            return `╭╼━≪••≫━╾╮\n` +
+                   `┃ 𝐅αнιм ввz мυѕι¢ 🎵\n` +
+                   `╰━━━━━━━━━━━━━━━╯\n` +
+                   `╭〔 𝘋ᴏᴡɴʟᴏᴅᴇ-ꜱᴏɴɢ 〕-━╮\n` +
+                   `│ │🌸 _Title:_ *${songTitle}*\n` +
+                   `│ │⏳ _Status:_ *${statusText}*\n` +
+                   `╰──────✧❁✧──────◆\n` +
+                   `╭──◆「 *FAHIM BBZ* 」◆\n` +
+                   `╰───★─☆─♪♪─◆`;
+        };
+
+        // 🖼️ Apnar Image ba Video/GIF er link ekhane dite parben (.mp4 ba image link)
+        const onlineMediaUrl = ""; // Example: "https://files.catbox.moe/apnar_link.mp4"
+        const localVideoPath = path.join(__dirname, '../../media/loading.mp4');
+
+        // 🚀 Instant loading message with media or text
+        try {
+            if (fs.existsSync(localVideoPath)) {
+                loadingMsg = await bad.sendMessage(m.chat, {
+                    video: fs.readFileSync(localVideoPath),
+                    caption: getFormattedText(keyword, LOADING_FRAMES[0]),
+                    gifPlayback: true
+                }, { quoted: m });
+            } else if (onlineMediaUrl && onlineMediaUrl.startsWith('http')) {
+                loadingMsg = await bad.sendMessage(m.chat, {
+                    video: { url: onlineMediaUrl },
+                    caption: getFormattedText(keyword, LOADING_FRAMES[0]),
+                    gifPlayback: true
+                }, { quoted: m });
+            } else {
+                loadingMsg = await bad.sendMessage(m.chat, { text: getFormattedText(keyword, LOADING_FRAMES[0]) }, { quoted: m });
+            }
+        } catch (mediaErr) {
+            loadingMsg = await bad.sendMessage(m.chat, { text: getFormattedText(keyword, LOADING_FRAMES[0]) }, { quoted: m });
         }
 
-        const videoUrl = firstVideo.url;
-        const dateNow = Date.now();
-        const botFooter = "FAHIM BBZ MUSIC";
-        const pushName = m.pushName || "Fahim";
-        const customImageLink = "https://files.catbox.moe/apnar_image.jpg"; 
+        let videoTitle = keyword;
+        let selectedLink = keyword;
 
-        let thumb = Buffer.alloc(0);
-        try {
-            const res = await axios.get(customImageLink, { responseType: "arraybuffer", timeout: 8000 });
-            thumb = await sharp(Buffer.from(res.data)).resize({ width: 300 }).jpeg({ quality: 80 }).toBuffer();
-        } catch (err) {}
+        const searchResult = await yts(keyword);
+        if (searchResult && searchResult.videos && searchResult.videos.length > 0) {
+            videoTitle = searchResult.videos[0].title;
+            selectedLink = searchResult.videos[0].url;
+        }
 
+        // ⏳ Progress bar animation loop
+        let frame = 1;
+        interval = setInterval(async () => {
+            try {
+                if (frame < LOADING_FRAMES.length && loadingMsg) {
+                    const frameText = getFormattedText(videoTitle, LOADING_FRAMES[frame]);
+                    // Jodi video/media thake tahowe caption edit hobe, nahole text edit hobe
+                    if (onlineMediaUrl || fs.existsSync(localVideoPath)) {
+                        await bad.sendMessage(m.chat, { edit: loadingMsg.key, caption: frameText });
+                    } else {
+                        await bad.sendMessage(m.chat, { edit: loadingMsg.key, text: frameText });
+                    }
+                    frame++;
+                }
+            } catch (e) {}
+        }, 1000);
+
+        // 🔄 12-ti Powerful API Fallback System
+        let audioUrl = null;
+        const e = encodeURIComponent;
+
+        const apis = [
+            async () => (await axios.get(`https://yt-dl.officialhectormanuel.workers.dev?url=${e(selectedLink)}`, { timeout: 10000 })).data?.audio,
+            async () => (await axios.get(`https://knightbotapi.stream/api/download/ytaudio?apikey=knight&format=128kbps&url=${e(selectedLink)}`, { timeout: 10000 })).data?.result?.download,
+            async () => {
+                const res = await axios.get(`https://api.princetechn.com/api/download/ytmp3?apikey=prince&url=${e(selectedLink)}`, { timeout: 10000 });
+                return res.data?.result?.downloadUrl || res.data?.result?.download;
+            },
+            async () => {
+                const res = await axios.get(`https://widipe.shareSpl.com/api/v1/download/ytmp3?url=${e(selectedLink)}`, { timeout: 10000 });
+                return res.data?.result?.downloadUrl || res.data?.result?.url;
+            },
+            async () => {
+                const res = await axios.get(`https://okatsu.my.id/api/ytmp3?url=${e(selectedLink)}`, { timeout: 10000 });
+                return res.data?.result?.mp3 || res.data?.mp3 || res.data?.result?.download;
+            },
+            async () => {
+                const res = await axios.get(`https://api.davidcyriltech.my.id/download/ytmp3?url=${e(selectedLink)}`, { timeout: 10000 });
+                return res.data?.success ? res.data?.result?.download_url : null;
+            },
+            async () => (await axios.get(`https://api.vreden.web.id/api/ytmp3?url=${e(selectedLink)}`, { timeout: 10000 })).data?.result?.download?.url,
+            async () => (await axios.get(`https://api.siputzx.my.id/api/d/ytmp3?url=${e(selectedLink)}`, { timeout: 10000 })).data?.data?.dl,
+            async () => (await axios.get(`https://kiraxmd-api.vercel.app/api/play?query=${e(selectedLink)}`, { timeout: 10000 })).data?.result?.mp3,
+            async () => (await axios.get(`https://xenoytdl-2.vercel.app/api/youtube?url=${e(selectedLink)}`, { timeout: 10000 })).data?.result?.mp3,
+            async () => (await axios.get(`https://jerrycoder.oggyapi.workers.dev/down/ytmp3-v1?url=${e(selectedLink)}`, { timeout: 10000 })).data?.result?.mp3,
+            async () => (await axios.get(`https://eliteprotech-apis.zone.id/ytdown?format=mp3&url=${e(selectedLink)}`, { timeout: 10000 })).data?.result?.download_url
+        ];
+
+        for (const apiFn of apis) {
+            if (audioUrl) break;
+            try {
+                const url = await apiFn();
+                if (url && typeof url === 'string' && url.startsWith('http')) {
+                    audioUrl = url;
+                }
+            } catch (err) {}
+        }
+
+        if (!audioUrl) {
+            throw new Error("Sobguli download server ei muhurte byasto ache.");
+        }
+
+        if (interval) clearInterval(interval);
+
+        // 🗑️ Gaan namar sathe sathe loading message delete kora
+        if (loadingMsg) {
+            try {
+                await bad.sendMessage(m.chat, { delete: loadingMsg.key });
+            } catch (e) {}
+        }
+
+        // 🎵 Asol audio file pathano
         await bad.sendMessage(
             m.chat,
             {
-                buttonsMessage: {
-                    buttons: [
-                        { buttonId: `audio_${firstVideo.id}_${dateNow}`, buttonText: { displayText: "🎵 Audio (MP3)" }, type: 1 },
-                        { buttonId: `vid_${firstVideo.id}_${dateNow}`, buttonText: { displayText: "🎬 Video (MP4)" }, type: 1 },
-                    ],
-                    contentText: `╭╼━≪••≫━╾╮\n` +
-                                 `┃ 𝐅αнιм ввz мυѕι¢ 🎵\n` +
-                                 `╰━━━━━━━━━━━━━━━╯\n` +
-                                 `╭〔 YOUTUBE PLAY 〕-━╮\n` +
-                                 `│ │🌸 _Title:_ *${firstVideo.title}*\n` +
-                                 `│ │⏳ _Duration:_ *${firstVideo.timestamp}*\n` +
-                                 `╰──────✧❁✧──────◆\n` +
-                                 `╭──◆「 *Select Format* 」◆\n` +
-                                 `╰───★─☆─♪♪─◆`,
-                    footerText: botFooter,
-                    contextInfo: { mentionedJid: [], groupMentions: [], statusAttributions: [] },
-                    headerType: 6,
-                    locationMessage: {
-                        degreesLatitude: 0,
-                        degreesLongitude: 0,
-                        name: `${pushName}`,
-                        address: `–FAHIM BBZ MUSIC`,
-                        jpegThumbnail: thumb,
-                    },
-                    viewOnce: true,
-                },
+                audio: { url: audioUrl },
+                mimetype: "audio/mp4",
+                fileName: `${videoTitle.replace(/[^\w\s-]/g, '')} - FAHIM BBZ.mp3`,
+                ptt: false,
             },
-            {
-                quoted: m,
-                additionalNodes: [
-                    {
-                        tag: "biz",
-                        attrs: {},
-                        content: [
-                            {
-                                tag: "interactive",
-                                attrs: { type: "native_flow", v: "1" },
-                                content: [
-                                    { tag: "native_flow", attrs: { v: "9", name: "mixed" } },
-                                ],
-                            },
-                        ],
-                    },
-                ],
-            }
+            { quoted: m }
         );
-        await bad.sendMessage(m.chat, { react: { text: "✅", key: m.key } }).catch(() => {});
-
-        const handleResponse = async (event) => {
-            const messageData = event.messages[0];
-            if (!messageData?.message) return;
-
-            const selectedButtonId = extractButtonId(messageData.message);
-            if (!selectedButtonId) return;
-            if (messageData.key?.remoteJid !== m.chat || !selectedButtonId.includes(dateNow.toString())) return;
-
-            try {
-                if (selectedButtonId.startsWith("audio_")) {
-                    await bad.sendMessage(m.chat, { react: { text: "⏳", key: messageData.key } }).catch(() => {});
-                    
-                    const audioBuf = await getMedia(videoUrl, "audio");
-                    if (!audioBuf) {
-                        await bad.sendMessage(m.chat, { text: "❌ Audio download failed from all servers." }, { quoted: messageData });
-                        return;
-                    }
-
-                    await bad.sendMessage(
-                        m.chat,
-                        {
-                            audio: await formatAudio(audioBuf),
-                            mimetype: "audio/mp4",
-                            fileName: `${firstVideo.title.replace(/[^\w\s-]/g, '')} - FAHIM BBZ.mp3`,
-                            ptt: false,
-                        },
-                        { quoted: messageData }
-                    );
-                    await bad.sendMessage(m.chat, { react: { text: "✅", key: messageData.key } }).catch(() => {});
-
-                } else if (selectedButtonId.startsWith("vid_")) {
-                    await bad.sendMessage(m.chat, { react: { text: "⏳", key: messageData.key } }).catch(() => {});
-                    
-                    const videoBuf = await getMedia(videoUrl, "video");
-                    if (!videoBuf) {
-                        await bad.sendMessage(m.chat, { text: "❌ Video download failed from all servers." }, { quoted: messageData });
-                        return;
-                    }
-
-                    await bad.sendMessage(
-                        m.chat,
-                        {
-                            video: await formatVideo(videoBuf),
-                            mimetype: "video/mp4",
-                            fileName: `${firstVideo.title.replace(/[^\w\s-]/g, '')} - FAHIM BBZ.mp4`,
-                            caption: `🎵 *${firstVideo.title}* - FAHIM BBZ`,
-                        },
-                        { quoted: messageData }
-                    );
-                    await bad.sendMessage(m.chat, { react: { text: "✅", key: messageData.key } }).catch(() => {});
-                }
-            } catch (error) {
-                console.error("Error sending media:", error);
-                await bad.sendMessage(m.chat, { text: "❌ Failed to send media. Please try again." }, { quoted: messageData });
-            }
-        };
-
-        bad.ev.on("messages.upsert", handleResponse);
-        setTimeout(() => {
-            bad.ev.off("messages.upsert", handleResponse);
-        }, 300000);
 
     } catch (error) {
-        console.error("Error in play command:", error);
-        await bad.sendMessage(m.chat, { react: { text: "❌", key: m.key } }).catch(() => {});
-        return bad.sendMessage(m.chat, { text: `❌ Error: ${error.message}` }, { quoted: m });
+        if (interval) clearInterval(interval);
+        console.error("❌ Error in play command:", error);
+
+        const failText = `❌ Gaan download korte somossa hoyeche. Abar chesta korun!`;
+        if (loadingMsg) {
+            try {
+                await bad.sendMessage(m.chat, { edit: loadingMsg.key, text: failText });
+            } catch (e) {
+                await bad.sendMessage(m.chat, { text: failText }, { quoted: m });
+            }
+        } else {
+            await bad.sendMessage(m.chat, { text: failText }, { quoted: m });
+        }
     }
 }
 break;
 
+    
+                
+        
+        
                                     
 
      
@@ -6907,23 +6785,6 @@ break;
 
 
     
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
