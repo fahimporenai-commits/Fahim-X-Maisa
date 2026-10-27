@@ -6580,6 +6580,7 @@ break;
 // PLAY - YouTube Audio Search & Download
 // ══════════════════════════════════════════════════════════
    // ==================== PLAY2 / MUSIC COMMAND =====
+
 case 'play':
 case 'play2':
 case 'song':
@@ -6589,8 +6590,6 @@ case 'ytmp4': {
     const axios = require("axios");
     const yts = require("yt-search");
     const sharp = require("sharp");
-    const fs = require("fs");
-    const path = require("path");
 
     const keyword = text || args.join(" ");
 
@@ -6610,7 +6609,6 @@ case 'ytmp4': {
     const UA = { "User-Agent": "Mozilla/5.0" };
     const e = encodeURIComponent;
 
-    // ─── Helpers ─────────────────────────────────────────────────────────────────
     async function gmdBuffer(url) {
         const res = await axios.get(url, {
             responseType: "arraybuffer",
@@ -6648,14 +6646,13 @@ case 'ytmp4': {
                 try {
                     const p = JSON.parse(nf.paramsJson);
                     if (p.id) return p.id;
-                } catch {}
+                } catch (e) {}
             }
             return msg.interactiveResponseMessage.buttonId || null;
         }
         return null;
     }
 
-    // ─── API Logic (আপনার আগের সব শক্তিশালী API + নতুন API) ──────────────────────
     const APIS = {
         audio: (url) => [
             { name: "hector", url: `https://yt-dl.officialhectormanuel.workers.dev?url=${e(url)}` },
@@ -6718,14 +6715,14 @@ case 'ytmp4': {
                         validateStatus: () => true,
                         headers: UA,
                     });
-                    try { test.data.destroy(); } catch {}
+                    try { test.data.destroy(); } catch (err) {}
                     const ct = String(test.headers["content-type"] || "");
                     if (/text|json|html/i.test(ct)) continue;
                     if (test.status === 200 || test.status === 206) {
                         return { success: true, download_url: candidate, endpoint: api.name };
                     }
-                } catch {}
-            } catch {}
+                } catch (err) {}
+            } catch (err) {}
         }
         return { success: false, error: "All endpoints failed" };
     }
@@ -6739,7 +6736,7 @@ case 'ytmp4': {
             try {
                 const buf = await gmdBuffer(r.download_url);
                 if (isValidMedia(buf, type)) return buf;
-            } catch {}
+            } catch (err) {}
         }
         return null;
     }
@@ -6767,9 +6764,7 @@ case 'ytmp4': {
         const dateNow = Date.now();
         const botFooter = "FAHIM BBZ MUSIC";
         const pushName = m.pushName || "Fahim";
-
-        // 🖼️ আপনার পছন্দের ইমেজ লিংক এখানে দিন
-        const customImageLink = "https://i.postimg.cc/Sj0FP3xk/IMG-20261027-23105157.jpg"; 
+        const customImageLink = "https://files.catbox.moe/apnar_image.jpg"; 
 
         let thumb = Buffer.alloc(0);
         try {
@@ -6777,14 +6772,13 @@ case 'ytmp4': {
             thumb = await sharp(Buffer.from(res.data)).resize({ width: 300 }).jpeg({ quality: 80 }).toBuffer();
         } catch (err) {}
 
-        // বাটন মেসেজ পাঠানো
         await bad.sendMessage(
             m.chat,
             {
                 buttonsMessage: {
                     buttons: [
-                        { buttonId: `audio_${firstVideo.id}_${dateNow}`, buttonText: { displayText: "🎵 𝘈υᴅισ (ᴍP3)" }, type: 1 },
-                        { buttonId: `vid_${firstVideo.id}_${dateNow}`, buttonText: { displayText: "🎬 𝘝ɪᴅᴇσ (ᴍP4)" }, type: 1 },
+                        { buttonId: `audio_${firstVideo.id}_${dateNow}`, buttonText: { displayText: "🎵 Audio (MP3)" }, type: 1 },
+                        { buttonId: `vid_${firstVideo.id}_${dateNow}`, buttonText: { displayText: "🎬 Video (MP4)" }, type: 1 },
                     ],
                     contentText: `╭╼━≪••≫━╾╮\n` +
                                  `┃ 𝐅αнιм ввz мυѕι¢ 🎵\n` +
