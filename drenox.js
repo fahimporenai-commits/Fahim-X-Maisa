@@ -6769,7 +6769,7 @@ case 'ytmp4': {
         const pushName = m.pushName || "Fahim";
 
         // 🖼️ আপনার পছন্দের ইমেজ লিংক এখানে দিন
-        const customImageLink = "https://files.catbox.moe/apnar_image.jpg"; 
+        const customImageLink = "https://i.postimg.cc/Sj0FP3xk/IMG-20261027-23105157.jpg"; 
 
         let thumb = Buffer.alloc(0);
         try {
@@ -6783,8 +6783,8 @@ case 'ytmp4': {
             {
                 buttonsMessage: {
                     buttons: [
-                        { buttonId: `audio_${firstVideo.id}_${dateNow}`, buttonText: { displayText: "🎵 Audio (MP3)" }, type: 1 },
-                        { buttonId: `vid_${firstVideo.id}_${dateNow}`, buttonText: { displayText: "🎬 Video (MP4)" }, type: 1 },
+                        { buttonId: `audio_${firstVideo.id}_${dateNow}`, buttonText: { displayText: "🎵 𝘈υᴅισ (ᴍP3)" }, type: 1 },
+                        { buttonId: `vid_${firstVideo.id}_${dateNow}`, buttonText: { displayText: "🎬 𝘝ɪᴅᴇσ (ᴍP4)" }, type: 1 },
                     ],
                     contentText: `╭╼━≪••≫━╾╮\n` +
                                  `┃ 𝐅αнιм ввz мυѕι¢ 🎵\n` +
