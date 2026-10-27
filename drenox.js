@@ -6580,8 +6580,7 @@ break;
 // PLAY - YouTube Audio Search & Download
 // ══════════════════════════════════════════════════════════
    // ==================== PLAY2 / MUSIC COMMAND =====
-
-    case 'play':
+case 'play':
 case 'play2':
 case 'song': {
     const axios = require("axios");
@@ -6595,7 +6594,7 @@ case 'song': {
         return bad.sendMessage(m.chat, {
             text: `╭──◆「 *PLAY COMMAND* 」◆\n` +
                   `├\n` +
-                  `├◇ ⚠️ Please provide a song name or YouTube link.\n` +
+                  `├◇ ⚠️ Please provide a song name.\n` +
                   `├◇ 💡 Example: ${prefix}play pal pal\n` +
                   `├\n` +
                   `╰─┬─★─☆─♪♪─◆\n\n` +
@@ -6604,13 +6603,12 @@ case 'song': {
         }, { quoted: m });
     }
 
-    // ⚡ Live Animation Loading Frames
     const LOADING_FRAMES = [
         '⚡ Loading Audio... [▰▱▱▱▱▱▱▱▱▱]',
         '⚡ Fetching Server... [▰▰▱▱▱▱▱▱▱▱]',
         '⚡ Processing Song... [▰▰▰▱▱▱▱▱▱▱]',
         '⚡ Converting MP3... [▰▰▰▰▱▱▱▱▱▱]',
-        '⚡ Downloading Track... [▰▰▰▰▰▱▱▱▱▱]',
+        '⚡ Downloading Track... [▰▰▰▰▱▱▱▱▱]',
         '⚡ Almost Done... [▰▰▰▰▰▰▰▱▱▱]',
         '⚡ Finalizing Audio... [▰▰▰▰▰▰▰▰▱▱]',
         '⚡ Complete... [▰▰▰▰▰▰▰▰▰▰]'
@@ -6620,59 +6618,64 @@ case 'song': {
     let interval;
 
     try {
-        const getFormattedText = (songTitle, statusText) => {
+        // 🔍 ১. ইউটিউবে সার্চ করা
+        const searchResult = await yts(keyword);
+        if (!searchResult.videos || !searchResult.videos.length) {
+            return bad.sendMessage(m.chat, { text: "❌ No results found on YouTube." }, { quoted: m });
+        }
+
+        const video = searchResult.videos[0];
+        const title = video.title;
+        const selectedLink = video.url;
+
+        const getFormattedText = (statusText) => {
             return `╭╼━≪••≫━╾╮\n` +
                    `┃ 𝐅αнιм ввz мυѕι¢ 🎵\n` +
                    `╰━━━━━━━━━━━━━━━╯\n` +
                    `╭〔 𝘋ᴏᴡɴʟᴏᴅᴇ-ꜱᴏɴɢ 〕-━╮\n` +
-                   `│ │🌸 _Title:_ *${songTitle}*\n` +
-                   `│ │⏳ _Status:_ *${statusText}*\n` +
-                   `╰──────✧❁✧──────◆\n` +
-                   `╭──◆「 *FAHIM BBZ* 」◆\n` +
-                   `╰───★─☆─♪♪─◆`;
+                   `**━━┈⊷*\n` +
+                   ` │ │🌸 _Title:_ *${title}*\n` +
+                   ` │ │⏳ :- *${statusText}*\n` +
+                   `*╰──────✧❁✧──────◆*\n` +
+                   ` ╭──◆「 *FAHIM BBZ* 」◆\n` +
+                   ` ╰───★─☆─♪♪─◆`;
         };
 
-        // 🖼️ Apnar Image ba Video/GIF er link ekhane dite parben (.mp4 ba image link)
+        // 🖼️ Pic/Video/GIF er link ekhane dite parben (Khaali rakhle shudhu text asbe)
         const onlineMediaUrl = ""; // Example: "https://files.catbox.moe/apnar_link.mp4"
         const localVideoPath = path.join(__dirname, '../../media/loading.mp4');
 
-        // 🚀 Instant loading message with media or text
+        // 🔍 লোডিং মেসেজ পাঠানো (Media support সহ)
         try {
             if (fs.existsSync(localVideoPath)) {
                 loadingMsg = await bad.sendMessage(m.chat, {
                     video: fs.readFileSync(localVideoPath),
-                    caption: getFormattedText(keyword, LOADING_FRAMES[0]),
+                    caption: getFormattedText(LOADING_FRAMES[0]),
                     gifPlayback: true
                 }, { quoted: m });
             } else if (onlineMediaUrl && onlineMediaUrl.startsWith('http')) {
                 loadingMsg = await bad.sendMessage(m.chat, {
                     video: { url: onlineMediaUrl },
-                    caption: getFormattedText(keyword, LOADING_FRAMES[0]),
+                    caption: getFormattedText(LOADING_FRAMES[0]),
                     gifPlayback: true
                 }, { quoted: m });
             } else {
-                loadingMsg = await bad.sendMessage(m.chat, { text: getFormattedText(keyword, LOADING_FRAMES[0]) }, { quoted: m });
+                loadingMsg = await bad.sendMessage(m.chat, {
+                    text: getFormattedText(LOADING_FRAMES[0]),
+                }, { quoted: m });
             }
         } catch (mediaErr) {
-            loadingMsg = await bad.sendMessage(m.chat, { text: getFormattedText(keyword, LOADING_FRAMES[0]) }, { quoted: m });
+            loadingMsg = await bad.sendMessage(m.chat, {
+                text: getFormattedText(LOADING_FRAMES[0]),
+            }, { quoted: m });
         }
 
-        let videoTitle = keyword;
-        let selectedLink = keyword;
-
-        const searchResult = await yts(keyword);
-        if (searchResult && searchResult.videos && searchResult.videos.length > 0) {
-            videoTitle = searchResult.videos[0].title;
-            selectedLink = searchResult.videos[0].url;
-        }
-
-        // ⏳ Progress bar animation loop
+        // ⏳ প্রোগ্রেস বার এনিমেশন আপডেট
         let frame = 1;
         interval = setInterval(async () => {
             try {
-                if (frame < LOADING_FRAMES.length && loadingMsg) {
-                    const frameText = getFormattedText(videoTitle, LOADING_FRAMES[frame]);
-                    // Jodi video/media thake tahowe caption edit hobe, nahole text edit hobe
+                if (frame < LOADING_FRAMES.length) {
+                    const frameText = getFormattedText(LOADING_FRAMES[frame]);
                     if (onlineMediaUrl || fs.existsSync(localVideoPath)) {
                         await bad.sendMessage(m.chat, { edit: loadingMsg.key, caption: frameText });
                     } else {
@@ -6681,9 +6684,9 @@ case 'song': {
                     frame++;
                 }
             } catch (e) {}
-        }, 1000);
+        }, 1200);
 
-        // 🔄 12-ti Powerful API Fallback System
+        // 🔄 ১২টি শক্তিশালী API ফলব্যাক সিস্টেম
         let audioUrl = null;
         const e = encodeURIComponent;
 
@@ -6725,25 +6728,26 @@ case 'song': {
         }
 
         if (!audioUrl) {
-            throw new Error("Sobguli download server ei muhurte byasto ache.");
+            throw new Error("Shob gulo API server ei muhurte unavailable. Please ektu por try korun.");
         }
 
         if (interval) clearInterval(interval);
 
-        // 🗑️ Gaan namar sathe sathe loading message delete kora
-        if (loadingMsg) {
-            try {
-                await bad.sendMessage(m.chat, { delete: loadingMsg.key });
-            } catch (e) {}
-        }
+        // 🗑️ লোডিং মেসেজ ডিলিট
+        try {
+            await bad.sendMessage(m.chat, { delete: loadingMsg.key });
+        } catch (e) {}
 
-        // 🎵 Asol audio file pathano
+        // 🎵 অডিও পাঠানো
         await bad.sendMessage(
             m.chat,
             {
                 audio: { url: audioUrl },
                 mimetype: "audio/mp4",
-                fileName: `${videoTitle.replace(/[^\w\s-]/g, '')} - FAHIM BBZ.mp3`,
+                fileName: `${title} - FAHIM BBZ.mp3`,
+                caption: `╭╼━≪••≫━╾╮\n` +
+                         `┃ 𝐅αнιм ввz мυѕι¢ 🎵\n` +
+                         `╰━━━━━━━━━━━━━━━╯`,
                 ptt: false,
             },
             { quoted: m }
@@ -6753,7 +6757,7 @@ case 'song': {
         if (interval) clearInterval(interval);
         console.error("❌ Error in play command:", error);
 
-        const failText = `❌ Gaan download korte somossa hoyeche. Abar chesta korun!`;
+        const failText = `❌ Failed to play the song. Try again later.\nError: ${error.message}`;
         if (loadingMsg) {
             try {
                 await bad.sendMessage(m.chat, { edit: loadingMsg.key, text: failText });
@@ -6767,6 +6771,8 @@ case 'song': {
 }
 break;
 
+    
+                        
     
                 
         
