@@ -6579,13 +6579,9 @@ break;
 // PLAY - YouTube Audio Search & Download
 // ══════════════════════════════════════════════════════════
    // ==================== PLAY2 / MUSICcase 'play':
-                                    
-   case 'play':
+  case 'play':
 case 'play2':
-case 'song':
-case 'video':
-case 'mp4':
-case 'ytmp4': {
+case 'song': {
     const axios = require("axios");
     const yts = require("yt-search");
 
@@ -6593,10 +6589,10 @@ case 'ytmp4': {
 
     if (!keyword) {
         return bad.sendMessage(m.chat, {
-            text: `╭──◆「 *PLAY COMMAND* 」◆\n` +
+            text: `╭──◆「 *PLAY2 COMMAND* 」◆\n` +
                   `├\n` +
-                  `├◇ ⚠️ Please provide a song or video name.\n` +
-                  `├◇ 💡 Example: ${prefix}play pal pal\n` +
+                  `├◇ ⚠️ Please provide a song name.\n` +
+                  `├◇ 💡 Example: ${prefix}play2 pal pal\n` +
                   `├\n` +
                   `╰─┬─★─☆─♪♪─◆\n\n` +
                   `╭──◆「 *FAHIM BBZ* 」◆\n` +
@@ -6605,13 +6601,13 @@ case 'ytmp4': {
     }
 
     const LOADING_FRAMES = [
-        '⚡ Searching YouTube... [▰▱▱▱▱▱▱▱▱▱]',
-        '⚡ Connecting Server... [▰▰▱▱▱▱▱▱▱▱]',
-        '⚡ Processing Track... [▰▰▰▱▱▱▱▱▱▱]',
-        '⚡ Converting Media... [▰▰▰▰▱▱▱▱▱▱]',
-        '⚡ Downloading File... [▰▰▰▰▰▱▱▱▱▱]',
+        '⚡ Loading Audio... [▰▱▱▱▱▱▱▱▱▱]',
+        '⚡ Fetching Server... [▰▰▱▱▱▱▱▱▱▱]',
+        '⚡ Processing Song... [▰▰▰▱▱▱▱▱▱▱]',
+        '⚡ Converting MP3... [▰▰▰▰▱▱▱▱▱▱]',
+        '⚡ Downloading Track... [▰▰▰▰▰▱▱▱▱▱]',
         '⚡ Almost Done... [▰▰▰▰▰▰▰▱▱▱]',
-        '⚡ Finalizing... [▰▰▰▰▰▰▰▰▱▱]',
+        '⚡ Finalizing Audio... [▰▰▰▰▰▰▰▰▱▱]',
         '⚡ Complete... [▰▰▰▰▰▰▰▰▰▰]'
     ];
 
@@ -6619,148 +6615,125 @@ case 'ytmp4': {
     let interval;
 
     try {
-        const getFormattedText = (songTitle, statusText) => {
-            return `╭╼━≪••≫━╾╮\n` +
-                   `┃ 𝐅αнιм ввz мυѕι¢ 🎵\n` +
-                   `╰━━━━━━━━━━━━━━━╯\n` +
-                   `╭〔 𝘋ᴏᴡɴʟᴏᴅɪɴɢ ᴍᴇᴅɪᴀ 〕-━╮\n` +
-                   `│ │🌸 _Title:_ *${songTitle}*\n` +
-                   `│ │⏳ _Status:_ *${statusText}*\n` +
-                   `╰──────✧❁✧──────◆\n` +
-                   `╭──◆「 *FAHIM BBZ* 」◆\n` +
-                   `╰───★─☆─♪♪─◆`;
-        };
-
-        // 🚀 ইনস্ট্যান্ট লোডিং মেসেজ পাঠানো
-        loadingMsg = await bad.sendMessage(m.chat, { text: getFormattedText(keyword, LOADING_FRAMES[0]) }, { quoted: m });
-
+        // 🔍 ১. ইউটিউবে সার্চ করা
         const searchResult = await yts(keyword);
         if (!searchResult.videos || !searchResult.videos.length) {
-            if (loadingMsg) await bad.sendMessage(m.chat, { delete: loadingMsg.key }).catch(() => {});
             return bad.sendMessage(m.chat, { text: "❌ No results found on YouTube." }, { quoted: m });
         }
 
         const video = searchResult.videos[0];
         const title = video.title;
         const selectedLink = video.url;
-        const isVideoCommand = m.body?.startsWith('.video') || m.body?.startsWith('.mp4') || m.body?.startsWith('.ytmp4');
-        const mediaType = isVideoCommand ? 'video' : 'audio';
 
-        // রিয়েলটাইম টাইটেল আপডেট
-        if (loadingMsg) {
-            try {
-                await bad.sendMessage(m.chat, { edit: loadingMsg.key, text: getFormattedText(title, LOADING_FRAMES[1]) });
-            } catch (err) {}
-        }
+        const getFormattedText = (statusText) => {
+            return `╭╼━≪••≫━╾╮\n` +
+                   `┃ 𝐅αнιм ввz мυѕι¢ 🎵\n` +
+                   `╰━━━━━━━━━━━━━━━╯\n` +
+                   `╭〔 𝘋ᴏᴡɴʟᴏᴅᴇ-ꜱᴏɴɢ 〕-━╮\n` +
+                   `**━━┈⊷*\n` +
+                   ` │ │🌸 _Title:_ *${title}*\n` +
+                   ` │ │⏳ :- *${statusText}*\n` +
+                   `*╰──────✧❁✧──────◆*\n` +
+                   ` ╭──◆「 *FAHIM BBZ* 」◆\n` +
+                   ` ╰───★─☆─♪♪─◆`;
+        };
 
-        // ⏳ প্রোগ্রেস বার অ্যানিমেশন লুপ
-        let frame = 2;
+        // 🔍 লোডিং মেসেজ পাঠানো
+        loadingMsg = await bad.sendMessage(m.chat, {
+            text: getFormattedText(LOADING_FRAMES[0]),
+        }, { quoted: m });
+
+        // ⏳ প্রোগ্রেস বার এনিমেশন আপডেট
+        let frame = 1;
         interval = setInterval(async () => {
             try {
-                if (frame < LOADING_FRAMES.length && loadingMsg) {
-                    const frameText = getFormattedText(title, LOADING_FRAMES[frame]);
+                if (frame < LOADING_FRAMES.length) {
+                    const frameText = getFormattedText(LOADING_FRAMES[frame]);
                     await bad.sendMessage(m.chat, { edit: loadingMsg.key, text: frameText });
                     frame++;
                 }
-            } catch (err) {}
-        }, 1000);
+            } catch (e) {}
+        }, 1200);
 
-        // 🔄 ১২টি শক্তিশালী API ফলব্যাক সিস্টেম
-        let mediaUrl = null;
-        const e = encodeURIComponent;
+        // 🔄 ৫টি শক্তিশালী API ফলব্যাক সিস্টেম (Hector prothome, tarpor Knight)
+        let audioUrl = null;
+        const encodedUrl = encodeURIComponent(selectedLink);
 
-        const apis = mediaType === 'audio' ? [
-            async () => (await axios.get(`https://yt-dl.officialhectormanuel.workers.dev?url=${e(selectedLink)}`, { timeout: 10000 })).data?.audio,
-            async () => (await axios.get(`https://knightbotapi.stream/api/download/ytaudio?apikey=knight&format=128kbps&url=${e(selectedLink)}`, { timeout: 10000 })).data?.result?.download,
+        const apis = [
+            // 1. Hector API (1st Priority)
             async () => {
-                const res = await axios.get(`https://api.princetechn.com/api/download/ytmp3?apikey=prince&url=${e(selectedLink)}`, { timeout: 10000 });
+                const res = await axios.get(`https://yt-dl.officialhectormanuel.workers.dev?url=${encodedUrl}`, { timeout: 8000 });
+                return res.data?.audio || null;
+            },
+            // 2. KnightBot API (2nd Priority)
+            async () => {
+                const res = await axios.get(`https://knightbotapi.stream/api/download/ytaudio?apikey=knight&format=128kbps&url=${encodedUrl}`, { timeout: 8000 });
+                return res.data?.success ? res.data?.result?.download : null;
+            },
+            // 3. PrinceTech API
+            async () => {
+                const res = await axios.get(`https://api.princetechn.com/api/download/ytmp3?apikey=prince&url=${encodedUrl}`, { timeout: 8000 });
                 return res.data?.result?.downloadUrl || res.data?.result?.download;
             },
+            // 4. Widipe API
             async () => {
-                const res = await axios.get(`https://widipe.shareSpl.com/api/v1/download/ytmp3?url=${e(selectedLink)}`, { timeout: 10000 });
+                const res = await axios.get(`https://widipe.shareSpl.com/api/v1/download/ytmp3?url=${encodedUrl}`, { timeout: 8000 });
                 return res.data?.result?.downloadUrl || res.data?.result?.url;
             },
+            // 5. DavidCyril Tech API
             async () => {
-                const res = await axios.get(`https://okatsu.my.id/api/ytmp3?url=${e(selectedLink)}`, { timeout: 10000 });
-                return res.data?.result?.mp3 || res.data?.mp3 || res.data?.result?.download;
-            },
-            async () => {
-                const res = await axios.get(`https://api.davidcyriltech.my.id/download/ytmp3?url=${e(selectedLink)}`, { timeout: 10000 });
+                const res = await axios.get(`https://api.davidcyriltech.my.id/download/ytmp3?url=${encodedUrl}`, { timeout: 8000 });
                 return res.data?.success ? res.data?.result?.download_url : null;
-            },
-            async () => (await axios.get(`https://api.vreden.web.id/api/ytmp3?url=${e(selectedLink)}`, { timeout: 10000 })).data?.result?.download?.url,
-            async () => (await axios.get(`https://api.siputzx.my.id/api/d/ytmp3?url=${e(selectedLink)}`, { timeout: 10000 })).data?.data?.dl,
-            async () => (await axios.get(`https://kiraxmd-api.vercel.app/api/play?query=${e(selectedLink)}`, { timeout: 10000 })).data?.result?.mp3,
-            async () => (await axios.get(`https://xenoytdl-2.vercel.app/api/youtube?url=${e(selectedLink)}`, { timeout: 10000 })).data?.result?.mp3,
-            async () => (await axios.get(`https://jerrycoder.oggyapi.workers.dev/down/ytmp3-v1?url=${e(selectedLink)}`, { timeout: 10000 })).data?.result?.mp3,
-            async () => (await axios.get(`https://eliteprotech-apis.zone.id/ytdown?format=mp3&url=${e(selectedLink)}`, { timeout: 10000 })).data?.result?.download_url
-        ] : [
-            async () => (await axios.get(`https://widipe.shareSpl.com/api/v1/download/ytmp4?url=${e(selectedLink)}`, { timeout: 10000 })).data?.result?.downloadUrl,
-            async () => (await axios.get(`https://api.davidcyriltech.my.id/download/ytmp4?url=${e(selectedLink)}`, { timeout: 10000 })).data?.result?.download_url,
-            async () => (await axios.get(`https://api.vreden.web.id/api/ytmp4?url=${e(selectedLink)}`, { timeout: 10000 })).data?.result?.download?.url,
-            async () => (await axios.get(`https://api.siputzx.my.id/api/d/ytmp4?url=${e(selectedLink)}`, { timeout: 10000 })).data?.data?.dl,
-            async () => (await axios.get(`https://xenoytdl-2.vercel.app/api/youtube?url=${e(selectedLink)}`, { timeout: 10000 })).data?.result?.mp4,
-            async () => (await axios.get(`https://jerrycoder.oggyapi.workers.dev/down/ytmp4-v1?url=${e(selectedLink)}`, { timeout: 10000 })).data?.result?.mp4,
-            async () => (await axios.get(`https://eliteprotech-apis.zone.id/ytdown?format=mp4&url=${e(selectedLink)}`, { timeout: 10000 })).data?.result?.download_url
+            }
         ];
 
         for (const apiFn of apis) {
-            if (mediaUrl) break;
+            if (audioUrl) break;
             try {
                 const url = await apiFn();
                 if (url && typeof url === 'string' && url.startsWith('http')) {
-                    mediaUrl = url;
+                    audioUrl = url;
                 }
             } catch (err) {}
         }
 
-        if (!mediaUrl) {
-            throw new Error("All servers are busy right now.");
+        if (!audioUrl) {
+            throw new Error("Sob gulo API server ei muhurte unavailable. Please ektu por try korun.");
         }
 
         if (interval) clearInterval(interval);
 
-        // 🗑️ লোডিং মেসেজ ডিলিট করা
-        if (loadingMsg) {
-            try {
-                await bad.sendMessage(m.chat, { delete: loadingMsg.key });
-            } catch (err) {}
-        }
+        // 🗑️ লোডিং মেসেজ ডিলিট
+        try {
+            await bad.sendMessage(m.chat, {
+                delete: loadingMsg.key
+            });
+        } catch (e) {}
 
-        // 🎵 অডিও বা ভিডিও ফাইল পাঠানো
-        if (mediaType === 'audio') {
-            await bad.sendMessage(
-                m.chat,
-                {
-                    audio: { url: mediaUrl },
-                    mimetype: "audio/mp4",
-                    fileName: `${title.replace(/[^\w\s-]/g, '')} - FAHIM BBZ.mp3`,
-                    ptt: false,
-                },
-                { quoted: m }
-            );
-        } else {
-            await bad.sendMessage(
-                m.chat,
-                {
-                    video: { url: mediaUrl },
-                    mimetype: "video/mp4",
-                    fileName: `${title.replace(/[^\w\s-]/g, '')} - FAHIM BBZ.mp4`,
-                    caption: `🎵 *${title}* - FAHIM BBZ`,
-                },
-                { quoted: m }
-            );
-        }
+        // 🎵 অডিও ফাইল পাঠানো
+        await bad.sendMessage(
+            m.chat,
+            {
+                audio: { url: audioUrl },
+                mimetype: "audio/mp4",
+                fileName: `${title} - FAHIM BBZ.mp3`,
+                caption: `╭╼━≪••≫━╾╮\n` +
+                         `┃ 𝐅αнιм ввz мυѕι¢ 🎵\n` +
+                         `╰━━━━━━━━━━━━━━━╯`,
+                ptt: false,
+            },
+            { quoted: m }
+        );
 
     } catch (error) {
         if (interval) clearInterval(interval);
         console.error("❌ Error in play command:", error);
 
-        const failText = `❌ Download failed! Please try again later.`;
+        const failText = `❌ Failed to play the song. Try again later.\nError: ${error.message}`;
         if (loadingMsg) {
             try {
                 await bad.sendMessage(m.chat, { edit: loadingMsg.key, text: failText });
-            } catch (err) {
+            } catch (e) {
                 await bad.sendMessage(m.chat, { text: failText }, { quoted: m });
             }
         } else {
@@ -6769,6 +6742,12 @@ case 'ytmp4': {
     }
 }
 break;
+                                  
+   
+         
+              
+    
+
              
 
 
