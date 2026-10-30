@@ -1090,9 +1090,9 @@ if (getSetting(m.chat, "feature.antibot", false)) {
 const bbyCmd = require('./commands/bby');
 
 // Check message triggers (Prefix সহ বা ছাড়া)
-if (typeof bbyAi.handleEvent === 'function') {
-    bbyAi.handleEvent(typeof bad !== 'undefined' ? bad : conn, m);
-} 
+if (typeof bbyCmd.handleEvent === 'function') {
+  await bbyCmd.handleEvent(bad, m);
+}
     if (m.text) {
   const textLower = m.text.trim().toLowerCase();
   const triggers = ['bby', 'tuki', 'baby', 'shona', 'ai', '.nipa', '.tuki', '.baby', '.shona', '.ai'];
