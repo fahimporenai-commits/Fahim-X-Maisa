@@ -6538,7 +6538,7 @@ case "ytmp4": {
     try {
         await bad.sendMessage(m.chat, {react: {text: '⏳', key: m.key}});
         
-        const response = await axios.post('https://youtube-video-audio-downloader.p.rapidapi.com/videos/downloads', 
+        const response = await axios.post('https://kiraxmd-api.vercel.app/api/play?query', 
         {
             url: text,
             quality: '720'
@@ -6618,7 +6618,6 @@ case 'song': {
     let interval;
 
     try {
-        // 🔍 ১. ইউটিউবে সার্চ করা
         const searchResult = await yts(keyword);
         if (!searchResult.videos || !searchResult.videos.length) {
             return bad.sendMessage(m.chat, { text: "❌ No results found on YouTube." }, { quoted: m });
@@ -6641,12 +6640,10 @@ case 'song': {
                    ` ╰───★─☆─♪♪─◆`;
         };
 
-        // 🔍 লোডিং মেসেজ পাঠানো
         loadingMsg = await bad.sendMessage(m.chat, {
             text: getFormattedText(LOADING_FRAMES[0]),
         }, { quoted: m });
 
-        // ⏳ প্রোগ্রেস বার এনিমেশন আপডেট
         let frame = 1;
         interval = setInterval(async () => {
             try {
@@ -6658,36 +6655,35 @@ case 'song': {
             } catch (e) {}
         }, 1200);
 
-        // 🔄 ৫টি শক্তিশালী API ফলব্যাক সিস্টেম (Hector prothome, tarpor Knight)
         let audioUrl = null;
         const encodedUrl = encodeURIComponent(selectedLink);
 
+        // 🔄 ১২টি শক্তিশালী API লিস্ট (Safe Fallback সহ)
         const apis = [
-            // 1. Hector API (1st Priority)
+            async () => (await axios.get(`https://yt-dl.officialhectormanuel.workers.dev?url=${encodedUrl}`, { timeout: 6000 })).data?.audio,
+            async () => (await axios.get(`https://knightbotapi.stream/api/download/ytaudio?apikey=knight&format=128kbps&url=${encodedUrl}`, { timeout: 6000 })).data?.result?.download,
             async () => {
-                const res = await axios.get(`https://yt-dl.officialhectormanuel.workers.dev?url=${encodedUrl}`, { timeout: 8000 });
-                return res.data?.audio || null;
-            },
-            // 2. KnightBot API (2nd Priority)
-            async () => {
-                const res = await axios.get(`https://knightbotapi.stream/api/download/ytaudio?apikey=knight&format=128kbps&url=${encodedUrl}`, { timeout: 8000 });
-                return res.data?.success ? res.data?.result?.download : null;
-            },
-            // 3. PrinceTech API
-            async () => {
-                const res = await axios.get(`https://api.princetechn.com/api/download/ytmp3?apikey=prince&url=${encodedUrl}`, { timeout: 8000 });
+                const res = await axios.get(`https://api.princetechn.com/api/download/ytmp3?apikey=prince&url=${encodedUrl}`, { timeout: 6000 });
                 return res.data?.result?.downloadUrl || res.data?.result?.download;
             },
-            // 4. Widipe API
             async () => {
-                const res = await axios.get(`https://widipe.shareSpl.com/api/v1/download/ytmp3?url=${encodedUrl}`, { timeout: 8000 });
+                const res = await axios.get(`https://widipe.shareSpl.com/api/v1/download/ytmp3?url=${encodedUrl}`, { timeout: 6000 });
                 return res.data?.result?.downloadUrl || res.data?.result?.url;
             },
-            // 5. DavidCyril Tech API
             async () => {
-                const res = await axios.get(`https://api.davidcyriltech.my.id/download/ytmp3?url=${encodedUrl}`, { timeout: 8000 });
+                const res = await axios.get(`https://okatsu.my.id/api/ytmp3?url=${encodedUrl}`, { timeout: 6000 });
+                return res.data?.result?.mp3 || res.data?.mp3 || res.data?.result?.download;
+            },
+            async () => {
+                const res = await axios.get(`https://api.davidcyriltech.my.id/download/ytmp3?url=${encodedUrl}`, { timeout: 6000 });
                 return res.data?.success ? res.data?.result?.download_url : null;
-            }
+            },
+            async () => (await axios.get(`https://api.vreden.web.id/api/ytmp3?url=${encodedUrl}`, { timeout: 6000 })).data?.result?.download?.url,
+            async () => (await axios.get(`https://api.siputzx.my.id/api/d/ytmp3?url=${encodedUrl}`, { timeout: 6000 })).data?.data?.dl,
+            async () => (await axios.get(`https://kiraxmd-api.vercel.app/api/play?query=${encodedUrl}`, { timeout: 6000 })).data?.result?.mp3,
+            async () => (await axios.get(`https://xenoytdl-2.vercel.app/api/youtube?url=${encodedUrl}`, { timeout: 6000 })).data?.result?.mp3,
+            async () => (await axios.get(`https://jerrycoder.oggyapi.workers.dev/down/ytmp3-v1?url=${encodedUrl}`, { timeout: 6000 })).data?.result?.mp3,
+            async () => (await axios.get(`https://eliteprotech-apis.zone.id/ytdown?format=mp3&url=${encodedUrl}`, { timeout: 6000 })).data?.result?.download_url
         ];
 
         for (const apiFn of apis) {
@@ -6701,19 +6697,15 @@ case 'song': {
         }
 
         if (!audioUrl) {
-            throw new Error("Sob gulo API server ei muhurte unavailable. Please ektu por try korun.");
+            throw new Error("Sob guli API server ei muhurte offline ba down ache.");
         }
 
         if (interval) clearInterval(interval);
 
-        // 🗑️ লোডিং মেসেজ ডিলিট
         try {
-            await bad.sendMessage(m.chat, {
-                delete: loadingMsg.key
-            });
+            await bad.sendMessage(m.chat, { delete: loadingMsg.key });
         } catch (e) {}
 
-        // 🎵 অডিও ফাইল পাঠানো
         await bad.sendMessage(
             m.chat,
             {
@@ -6745,6 +6737,14 @@ case 'song': {
     }
 }
 break;
+
+                
+                
+                
+        
+
+        
+
                                   
    
          
