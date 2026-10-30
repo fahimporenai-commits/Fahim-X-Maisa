@@ -6579,12 +6579,15 @@ break;
 // PLAY - YouTube Audio Search & Download
 // ══════════════════════════════════════════════════════════
    // ==================== PLAY2 / MUSICcase 'play':
+                                    
+   case 'play':
 case 'play2':
-case 'song': {
+case 'song':
+case 'video':
+case 'mp4':
+case 'ytmp4': {
     const axios = require("axios");
     const yts = require("yt-search");
-    const fs = require("fs");
-    const path = require("path");
 
     const keyword = text || args.join(" ");
 
@@ -6592,7 +6595,7 @@ case 'song': {
         return bad.sendMessage(m.chat, {
             text: `╭──◆「 *PLAY COMMAND* 」◆\n` +
                   `├\n` +
-                  `├◇ ⚠️ Please provide a song name or YouTube link.\n` +
+                  `├◇ ⚠️ Please provide a song or video name.\n` +
                   `├◇ 💡 Example: ${prefix}play pal pal\n` +
                   `├\n` +
                   `╰─┬─★─☆─♪♪─◆\n\n` +
@@ -6601,15 +6604,14 @@ case 'song': {
         }, { quoted: m });
     }
 
-    // ⚡ লাইভ অ্যানিমেশন লোডিং ফ্রেমগুলো
     const LOADING_FRAMES = [
-        '⚡ Loading Audio... [▰▱▱▱▱▱▱▱▱▱]',
-        '⚡ Fetching Server... [▰▰▱▱▱▱▱▱▱▱]',
-        '⚡ Processing Song... [▰▰▰▱▱▱▱▱▱]',
-        '⚡ Converting MP3... [▰▰▰▰▱▱▱▱▱▱]',
-        '⚡ Downloading Track... [▰▰▰▰▰▱▱▱▱▱]',
-        '⚡ Almost Done... [▰▰▰▰▰▰▱▱▱▱]',
-        '⚡ Finalizing Audio... [▰▰▰▰▰▰▰▱▱]',
+        '⚡ Searching YouTube... [▰▱▱▱▱▱▱▱▱▱]',
+        '⚡ Connecting Server... [▰▰▱▱▱▱▱▱▱▱]',
+        '⚡ Processing Track... [▰▰▰▱▱▱▱▱▱▱]',
+        '⚡ Converting Media... [▰▰▰▰▱▱▱▱▱▱]',
+        '⚡ Downloading File... [▰▰▰▰▰▱▱▱▱▱]',
+        '⚡ Almost Done... [▰▰▰▰▰▰▰▱▱▱]',
+        '⚡ Finalizing... [▰▰▰▰▰▰▰▰▱▱]',
         '⚡ Complete... [▰▰▰▰▰▰▰▰▰▰]'
     ];
 
@@ -6621,7 +6623,7 @@ case 'song': {
             return `╭╼━≪••≫━╾╮\n` +
                    `┃ 𝐅αнιм ввz мυѕι¢ 🎵\n` +
                    `╰━━━━━━━━━━━━━━━╯\n` +
-                   `╭〔 𝘋ᴏᴡɴʟᴏᴅᴇ-ꜱᴏɴɢ 〕-━╮\n` +
+                   `╭〔 𝘋ᴏᴡɴʟᴏᴅɪɴɢ ᴍᴇᴅɪᴀ 〕-━╮\n` +
                    `│ │🌸 _Title:_ *${songTitle}*\n` +
                    `│ │⏳ _Status:_ *${statusText}*\n` +
                    `╰──────✧❁✧──────◆\n` +
@@ -6629,137 +6631,136 @@ case 'song': {
                    `╰───★─☆─♪♪─◆`;
         };
 
-        // 🔗 এখানে আপনার ভিডিও লিংক বা লোকাল পাথ রাখতে পারবেন (इচ্ছা হলে ব্যবহার করবেন)
-        const onlineMediaUrl = "https://i.postimg.cc/Sj0FP3xk/IMG-20261027-23105157.jpg"; // খালি রাখলে শুধু টেক্সট দিয়ে ফাস্ট কাজ করবে, লিংক দিলে ভিডিও দিয়ে দেখাবে
-        const localVideoPath = path.join(__dirname, '../../media/loading.mp4');
-
-        // 🚀 ১. ইনস্ট্যান্ট লোডিং মেসেজ পাঠানো
-        try {
-            if (fs.existsSync(localVideoPath)) {
-                loadingMsg = await bad.sendMessage(m.chat, {
-                    video: fs.readFileSync(localVideoPath),
-                    caption: getFormattedText(keyword, LOADING_FRAMES[0]),
-                    gifPlayback: true
-                }, { quoted: m });
-            } else if (onlineMediaUrl && onlineMediaUrl.startsWith('http')) {
-                loadingMsg = await bad.sendMessage(m.chat, {
-                    video: { url: onlineMediaUrl },
-                    caption: getFormattedText(keyword, LOADING_FRAMES[0]),
-                    gifPlayback: true
-                }, { quoted: m });
-            } else {
-                // লিংক না দেওয়া থাকলে বা ফাঁকা থাকলে রকেটের গতিতে টেক্সট মেসেজ পাঠাবে
-                loadingMsg = await bad.sendMessage(m.chat, { text: getFormattedText(keyword, LOADING_FRAMES[0]) }, { quoted: m });
-            }
-        } catch (e) {
-            loadingMsg = await bad.sendMessage(m.chat, { text: getFormattedText(keyword, LOADING_FRAMES[0]) }, { quoted: m });
-        }
-
-        // 🔍 ২. ব্যাকগ্রাউন্ডে ইউটিউব থেকে ভিডিও ইনফো বের করা
-        let videoTitle = keyword;
-        let selectedLink = keyword;
+        // 🚀 ইনস্ট্যান্ট লোডিং মেসেজ পাঠানো
+        loadingMsg = await bad.sendMessage(m.chat, { text: getFormattedText(keyword, LOADING_FRAMES[0]) }, { quoted: m });
 
         const searchResult = await yts(keyword);
-        if (searchResult && searchResult.videos && searchResult.videos.length > 0) {
-            videoTitle = searchResult.videos[0].title;
-            selectedLink = searchResult.videos[0].url;
+        if (!searchResult.videos || !searchResult.videos.length) {
+            if (loadingMsg) await bad.sendMessage(m.chat, { delete: loadingMsg.key }).catch(() => {});
+            return bad.sendMessage(m.chat, { text: "❌ No results found on YouTube." }, { quoted: m });
         }
 
-        // ⏳ প্রোগ্রেস বার অ্যানিমেশন লুপ শুরু
-        let frame = 1;
+        const video = searchResult.videos[0];
+        const title = video.title;
+        const selectedLink = video.url;
+        const isVideoCommand = m.body?.startsWith('.video') || m.body?.startsWith('.mp4') || m.body?.startsWith('.ytmp4');
+        const mediaType = isVideoCommand ? 'video' : 'audio';
+
+        // রিয়েলটাইম টাইটেল আপডেট
+        if (loadingMsg) {
+            try {
+                await bad.sendMessage(m.chat, { edit: loadingMsg.key, text: getFormattedText(title, LOADING_FRAMES[1]) });
+            } catch (err) {}
+        }
+
+        // ⏳ প্রোগ্রেস বার অ্যানিমেশন লুপ
+        let frame = 2;
         interval = setInterval(async () => {
             try {
                 if (frame < LOADING_FRAMES.length && loadingMsg) {
-                    const frameText = getFormattedText(videoTitle, LOADING_FRAMES[frame]);
+                    const frameText = getFormattedText(title, LOADING_FRAMES[frame]);
                     await bad.sendMessage(m.chat, { edit: loadingMsg.key, text: frameText });
                     frame++;
                 }
-            } catch (e) {}
+            } catch (err) {}
         }, 1000);
 
-        // 🔄 ৩. ৮টি শক্তিশালী API ফলব্যাক সিস্টেম
-        let audioUrl = null;
+        // 🔄 ১২টি শক্তিশালী API ফলব্যাক সিস্টেম
+        let mediaUrl = null;
+        const e = encodeURIComponent;
 
-        const apis = [
+        const apis = mediaType === 'audio' ? [
+            async () => (await axios.get(`https://yt-dl.officialhectormanuel.workers.dev?url=${e(selectedLink)}`, { timeout: 10000 })).data?.audio,
+            async () => (await axios.get(`https://knightbotapi.stream/api/download/ytaudio?apikey=knight&format=128kbps&url=${e(selectedLink)}`, { timeout: 10000 })).data?.result?.download,
             async () => {
-                const res = await axios.get(`https://yt-dl.officialhectormanuel.workers.dev?url=${encodeURIComponent(selectedLink)}`, { timeout: 10000 });
-                return res.data?.audio;
-            },
-            async () => {
-                const res = await axios.get(`https://knightbotapi.stream/api/download/ytaudio?apikey=knight&format=128kbps&url=${encodeURIComponent(selectedLink)}`, { timeout: 10000 });
-                return res.data?.success ? res.data?.result?.download : null;
-            },
-            async () => {
-                const res = await axios.get(`https://api.princetechn.com/api/download/ytmp3?apikey=prince&url=${encodeURIComponent(selectedLink)}`, { timeout: 10000 });
+                const res = await axios.get(`https://api.princetechn.com/api/download/ytmp3?apikey=prince&url=${e(selectedLink)}`, { timeout: 10000 });
                 return res.data?.result?.downloadUrl || res.data?.result?.download;
             },
             async () => {
-                const res = await axios.get(`https://widipe.shareSpl.com/api/v1/download/ytmp3?url=${encodeURIComponent(selectedLink)}`, { timeout: 10000 });
+                const res = await axios.get(`https://widipe.shareSpl.com/api/v1/download/ytmp3?url=${e(selectedLink)}`, { timeout: 10000 });
                 return res.data?.result?.downloadUrl || res.data?.result?.url;
             },
             async () => {
-                const res = await axios.get(`https://okatsu.my.id/api/ytmp3?url=${encodeURIComponent(selectedLink)}`, { timeout: 10000 });
+                const res = await axios.get(`https://okatsu.my.id/api/ytmp3?url=${e(selectedLink)}`, { timeout: 10000 });
                 return res.data?.result?.mp3 || res.data?.mp3 || res.data?.result?.download;
             },
             async () => {
-                const res = await axios.get(`https://api.davidcyriltech.my.id/download/ytmp3?url=${encodeURIComponent(selectedLink)}`, { timeout: 10000 });
+                const res = await axios.get(`https://api.davidcyriltech.my.id/download/ytmp3?url=${e(selectedLink)}`, { timeout: 10000 });
                 return res.data?.success ? res.data?.result?.download_url : null;
             },
-            async () => {
-                const res = await axios.get(`https://api.vreden.web.id/api/ytmp3?url=${encodeURIComponent(selectedLink)}`, { timeout: 10000 });
-                return res.data?.result?.download?.url;
-            },
-            async () => {
-                const res = await axios.get(`https://api.siputzx.my.id/api/d/ytmp3?url=${encodeURIComponent(selectedLink)}`, { timeout: 10000 });
-                return res.data?.data?.dl;
-            }
+            async () => (await axios.get(`https://api.vreden.web.id/api/ytmp3?url=${e(selectedLink)}`, { timeout: 10000 })).data?.result?.download?.url,
+            async () => (await axios.get(`https://api.siputzx.my.id/api/d/ytmp3?url=${e(selectedLink)}`, { timeout: 10000 })).data?.data?.dl,
+            async () => (await axios.get(`https://kiraxmd-api.vercel.app/api/play?query=${e(selectedLink)}`, { timeout: 10000 })).data?.result?.mp3,
+            async () => (await axios.get(`https://xenoytdl-2.vercel.app/api/youtube?url=${e(selectedLink)}`, { timeout: 10000 })).data?.result?.mp3,
+            async () => (await axios.get(`https://jerrycoder.oggyapi.workers.dev/down/ytmp3-v1?url=${e(selectedLink)}`, { timeout: 10000 })).data?.result?.mp3,
+            async () => (await axios.get(`https://eliteprotech-apis.zone.id/ytdown?format=mp3&url=${e(selectedLink)}`, { timeout: 10000 })).data?.result?.download_url
+        ] : [
+            async () => (await axios.get(`https://widipe.shareSpl.com/api/v1/download/ytmp4?url=${e(selectedLink)}`, { timeout: 10000 })).data?.result?.downloadUrl,
+            async () => (await axios.get(`https://api.davidcyriltech.my.id/download/ytmp4?url=${e(selectedLink)}`, { timeout: 10000 })).data?.result?.download_url,
+            async () => (await axios.get(`https://api.vreden.web.id/api/ytmp4?url=${e(selectedLink)}`, { timeout: 10000 })).data?.result?.download?.url,
+            async () => (await axios.get(`https://api.siputzx.my.id/api/d/ytmp4?url=${e(selectedLink)}`, { timeout: 10000 })).data?.data?.dl,
+            async () => (await axios.get(`https://xenoytdl-2.vercel.app/api/youtube?url=${e(selectedLink)}`, { timeout: 10000 })).data?.result?.mp4,
+            async () => (await axios.get(`https://jerrycoder.oggyapi.workers.dev/down/ytmp4-v1?url=${e(selectedLink)}`, { timeout: 10000 })).data?.result?.mp4,
+            async () => (await axios.get(`https://eliteprotech-apis.zone.id/ytdown?format=mp4&url=${e(selectedLink)}`, { timeout: 10000 })).data?.result?.download_url
         ];
 
         for (const apiFn of apis) {
-            if (audioUrl) break;
+            if (mediaUrl) break;
             try {
                 const url = await apiFn();
                 if (url && typeof url === 'string' && url.startsWith('http')) {
-                    audioUrl = url;
+                    mediaUrl = url;
                 }
-            } catch (e) {}
+            } catch (err) {}
         }
 
-        if (!audioUrl) {
-            throw new Error("সবগুলো গান ডাউনলোড সার্ভার এই মুহূর্তে ব্যস্ত বা ডাউন আছে।");
+        if (!mediaUrl) {
+            throw new Error("All servers are busy right now.");
         }
 
-        // অ্যানিমেশন বন্ধ করা
         if (interval) clearInterval(interval);
 
-        // 🗑️ ৪. গান ডাউনলোড হওয়ার সাথে সাথে লোডিং মেসেজ ডিলিট করা
+        // 🗑️ লোডিং মেসেজ ডিলিট করা
         if (loadingMsg) {
             try {
                 await bad.sendMessage(m.chat, { delete: loadingMsg.key });
-            } catch (e) {}
+            } catch (err) {}
         }
 
-        // 🎵 ৫. মূল অডিও ফাইল পাঠানো
-        await bad.sendMessage(
-            m.chat,
-            {
-                audio: { url: audioUrl },
-                mimetype: "audio/mp4",
-                fileName: `${videoTitle.replace(/[^\w\s-]/g, '')} - FAHIM BBZ.mp3`,
-                ptt: false,
-            },
-            { quoted: m }
-        );
+        // 🎵 অডিও বা ভিডিও ফাইল পাঠানো
+        if (mediaType === 'audio') {
+            await bad.sendMessage(
+                m.chat,
+                {
+                    audio: { url: mediaUrl },
+                    mimetype: "audio/mp4",
+                    fileName: `${title.replace(/[^\w\s-]/g, '')} - FAHIM BBZ.mp3`,
+                    ptt: false,
+                },
+                { quoted: m }
+            );
+        } else {
+            await bad.sendMessage(
+                m.chat,
+                {
+                    video: { url: mediaUrl },
+                    mimetype: "video/mp4",
+                    fileName: `${title.replace(/[^\w\s-]/g, '')} - FAHIM BBZ.mp4`,
+                    caption: `🎵 *${title}* - FAHIM BBZ`,
+                },
+                { quoted: m }
+            );
+        }
 
     } catch (error) {
         if (interval) clearInterval(interval);
         console.error("❌ Error in play command:", error);
 
-        const failText = `❌ গানটি ডাউনলোড করতে সমস্যা হয়েছে। আবার চেষ্টা করুন!\nError: ${error.message}`;
+        const failText = `❌ Download failed! Please try again later.`;
         if (loadingMsg) {
             try {
                 await bad.sendMessage(m.chat, { edit: loadingMsg.key, text: failText });
-            } catch (e) {
+            } catch (err) {
                 await bad.sendMessage(m.chat, { text: failText }, { quoted: m });
             }
         } else {
@@ -6768,21 +6769,7 @@ case 'song': {
     }
 }
 break;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+             
 
 
 
