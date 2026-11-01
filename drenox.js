@@ -1344,7 +1344,28 @@ if (m.text && (m.text.startsWith('.profilepic') || m.text.startsWith('.pp') || m
     isCreator
   });
 }
+// Goodnight Command Connection
+const goodnight = require('./commands/goodnight');
 
+// Command Handler check (commands match korle execution hobe)
+if (m.text && (
+    m.text.startsWith(".goodnight") || 
+    m.text.startsWith(".gn") || 
+    m.text.startsWith(".gcof") || 
+    m.text.startsWith(".close") ||
+    m.text.startsWith("/goodnight") ||
+    m.text.startsWith("goodnight")
+)) {
+    const prefix = m.text[0] && ['.', '/', '!'].includes(m.text[0]) ? m.text[0] : '.';
+    const args = m.text.trim().split(/ +/).slice(1);
+    
+    await goodnight.exec(bad, m, { 
+        args, 
+        prefix,
+        isAdmins, 
+        isCreator 
+    });
+}
 
 
 
