@@ -2,7 +2,7 @@
 
 module.exports = {
   name: "goodnight",
-  alias: ["gn", "gboff", "groupclose", "close"],
+  alias: ["gn", "gcof", "groupclose", "close"],
   category: "Moderation",
   desc: "Send custom refresh message and auto-close group with Normal or Funny Good Night card.",
 
