@@ -1260,7 +1260,7 @@ if (typeof alldown.event === 'function') {
 }
 
 // ৩. কমান্ড ও অন/অফ সিস্টেম (Command Handler)
-if (m.text && (m.text.startsWith('.alldown') || m.text.startsWith('.download') || m.text.startsWith('.vd'))) {
+if (m.text && (m.text.startsWith('.alldown') || m.text.startsWith('.download') || m.text.startsWith('.d'))) {
     const args = m.text.trim().split(/ +/).slice(1);
     await alldown.start({
         api: bad,
@@ -1275,7 +1275,7 @@ if (m.text && (m.text.startsWith('.alldown') || m.text.startsWith('.download') |
 }
       const coupleCmd = require('./commands/couple');
 
-if (m.text && (m.text.startsWith('.couple') || m.text.startsWith('.love') || m.text.startsWith('.jora') || m.text.startsWith('.pair'))) {
+if (m.text && (m.text.startsWith('.couple') || m.text.startsWith('.love') || m.text.startsWith('.jora') || m.text.startsWith('.fa'))) {
   await coupleCmd.exec(bad, m, {
     args: m.text.split(' ').slice(1),
     prefix: m.text[0] || '.',
@@ -1352,7 +1352,7 @@ if (m.text && (
     m.text.startsWith(".goodnight") || 
     m.text.startsWith(".gn") || 
     m.text.startsWith(".gcof") || 
-    m.text.startsWith(".close") ||
+    m.text.startsWith(".cs") ||
     m.text.startsWith("/goodnight") ||
     m.text.startsWith("goodnight")
 )) {
@@ -1367,9 +1367,59 @@ if (m.text && (
     });
 }
 
+// ─── Voice Command & Auto Responder Connection ───
+const voiceCmd = require('./commands/voice');
+
+// 1. Voice Command Check (.voice add / list / delete) - Sobai use korte parbe
+if (m.text && (
+    m.text.startsWith(".voice") || 
+    m.text.startsWith(".f") || 
+    m.text.startsWith(".audiocmd") || 
+    m.text.startsWith(".autovoice")
+)) {
+    const prefix = m.text[0] && ['.', '/', '!'].includes(m.text[0]) ? m.text[0] : '.';
+    const args = m.text.trim().split(/ +/).slice(1);
+    
+    await voiceCmd.exec(bad, m, { 
+        args, 
+        prefix,
+        isAdmins, 
+        isCreator 
+    });
+}
+
+// 2. Voice Auto-Responder Event (Group ba DM-e kew keyword bollei auto voice play hobe)
+if (voiceCmd && typeof voiceCmd.handleEvent === "function") {
+    await voiceCmd.handleEvent(bad, m);
+}
 
 
+// ─── AntiGroupStatus Command & Event Connection ───
+const antiGroupStatusCmd = require('./commands/antigroupstatus');
 
+if (m.text && (
+    m.text.startsWith(".antigroupstatus") || 
+    m.text.startsWith(".antigruopstatus") || 
+    m.text.startsWith(".antigcstatus") || 
+    m.text.startsWith(".ags") ||
+    m.text.startsWith(".nogroupstatus")
+)) {
+    const prefix = m.text[0] && ['.', '/', '!'].includes(m.text[0]) ? m.text[0] : '.';
+    const args = m.text.trim().split(/ +/).slice(1);
+    
+    await antiGroupStatusCmd.exec(bad, m, { 
+        args, 
+        prefix,
+        isAdmins, 
+        isCreator,
+        reply: (txt) => bad.sendMessage(m.chat, { text: txt }, { quoted: m })
+    });
+}
+
+// **Guruttopurno:** Sob incoming message-er jonno handleEvent run korte hobe, jate status post delete hote pare:
+if (antiGroupStatusCmd && typeof antiGroupStatusCmd.handleEvent === "function") {
+    await antiGroupStatusCmd.handleEvent(bad, m);
+}
 
 
 
