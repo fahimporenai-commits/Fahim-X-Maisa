@@ -11,7 +11,7 @@ const { autoLoadPairs } = require('./autoload');
 const axios = require("axios")
 
 const bot = new TelegramBot(BOT_TOKEN, { polling: true });
-const PAIR_IMAGE_URL = "https://i.postimg.cc/7Y51cVdh/IMG-20260430-022431.jpg";
+const PAIR_IMAGE_URL = "";
 const WA_CHANNEL_URL = "https://whatsapp.com/channel/0029VbDLv0h1dAw6SRSiPr30";
 const OWNER_WA_URL = "https://wa.me/8801719298647?s=t";
 const ALLOWED_GROUP_ID = "-1003729697262";
