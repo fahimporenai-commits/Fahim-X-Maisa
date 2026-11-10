@@ -39,7 +39,7 @@ async function downloadVideoFromYoutube(link, filePath) {
 
 module.exports = {
     name: "video",
-    alias: ["v", "ytdl"],
+    alias: ["Y", "ytdl"],
     category: "Media",
     desc: "Search and download video from YouTube",
 
