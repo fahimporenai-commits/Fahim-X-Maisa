@@ -1,6 +1,19 @@
 {
-  "vhaiya": "database/media_voices/vhaiya.mp3",
-  "vaiya": "database/media_voices/vhaiya.mp3",
-  "comedy": "database/media_voices/comedy.mp3",
-  "haso": "database/media_voices/haso.mp3"
-}
+  "story": "database/media_voices/story.mp3",
+  "vaiya": "database/media_voices/vaiya.mp3",
+  "alabu": "database/media_voices/alabu.mp3",
+  "caca": "database/media_voices/caca.mp3"
+  "chk": "database/media_voices/chk.mp3"
+  "ehh": "database/media_voices/ehh.mp3"
+  "inbox": "database/media_voices/inbox.mp3"
+  "kmn": "database/media_voices/kamn asen.mp3"
+  "kosto": "database/media_voices/kosto.mp3"
+  "meww": "database/media_voices/mewwww.mp3"
+  "modon": "database/media_voices/modon.mp3"
+  "name": "database/media_voices/name kita jula jula.mp3"
+  "dulavai": "database/media_voices/o dula vai.mp3"
+  "pahkii": "database/media_voices/pahkii.mp3"
+  "pahki": "database/media_voices/paki.mp3"
+  "suu": "database/media_voices/suu.mp3"
+  "love": "database/media_voices/umma.mp3"
+} 
