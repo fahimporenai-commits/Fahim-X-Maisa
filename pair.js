@@ -1169,8 +1169,8 @@ ${groupName}
 ╰━━━━━━━━━━━━━━━\n\n`;
 
                                 // Anti-Command list with bangla descriptions
-                                connectMsg += `╭───〔 ⚙️ ANTI-COMMAND 〕───╮\n`;
-                                connectMsg += `│\n`;
+                                connectMsg += `╭───〔 ⚙️ 𝘈ɴᴛɪ-𝐂ᴏᴍᴍᴀɴᴅ 𝐋ɪꜱᴛ 〕───╮\n`;
+                                connectMsg += `${readMore}\n`;
                                 connectMsg += `├• \`antilink kick / delete\` - কি্ক বা ডিলেট মোড\n`;
                                 connectMsg += `├• \`antistatus on / delete\` - স্ট্যাটাস প্রোটেকশন\n`;
                                 connectMsg += `├• \`antisticker on\` - স্টিকার ডিলেট ও ওয়ার্নিং\n`;
@@ -1184,7 +1184,7 @@ ${groupName}
                                 connectMsg += `╰───────────────────────────╯\n\n`;
 
                                 // ReadMore spacer
-                                connectMsg += `${readMore}\n`;
+                                
 
                                 // Contact & Channel info
                                 connectMsg += `╭───〔 📞 CONTACT & CHANNEL 〕───╮\n`;
