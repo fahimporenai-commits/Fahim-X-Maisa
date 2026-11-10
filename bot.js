@@ -187,7 +187,7 @@ async function sendPairCard(chatId, phoneJid, code, replyToMessageId) {
   const country = `${phone.flag} ${phone.name}${phone.callingCode ? ` (+${phone.callingCode})` : ''}`;
   const pairingCode = code || '';
   const caption = [
-    `🔐 <b>PAIR CODE READY</b>`,
+    `🔐 <b>𝗣𝗔𝗜𝗥 𝗖𝗢𝗗𝗘 𝗥𝗘𝗔𝗗𝗬</b>`,
     '',
     makeTelegramTable([
       ['Number', `+${phone.digits}`],
@@ -196,11 +196,11 @@ async function sendPairCard(chatId, phoneJid, code, replyToMessageId) {
     ]),
     '',
     `📌 <b>HOW TO LINK</b>`,
-    `1. WhatsApp → Settings → Linked Devices`,
-    `2. Link a Device → Link with phone number instead`,
-    `3. Enter the code shown above`,
+    `1. 𝘞ʜᴀᴛꜱᴀᴩᴩ → 𝘚ᴇᴛᴛɪɴɢꜱ → 𝘓ɪɴᴋᴇᴅ ᗪᴇᴠɪcʟᴄᴇꜱ`,
+    `2. 𝐋ɪɴᴋ ꫝ ᗪEᐯIᑕE → ᒪIᑎK ᗯITᕼ ᑭᕼOᑎE ᑎᑌᗰᗷEᖇ IᑎѕTEᗩᗪ`,
+    `3. 𝐄ɴᴛᴇʀ 𝐓ʜᴇ ᑕσᴅᴇ 𝗦ʜᴏᴡɴ 𝔸ʙᴏᴠᴇ`,
     '',
-    `⏳ <i>Code is temporary. If it expires, request a new one. Keep it private.</i>`
+    `⏳ <i>🅒︎ᴏᴅᴇ 𝚎𝚡𝚙𝚒𝚛𝚎𝚜,𝚒𝚗 ⑥︎⓪︎𝐒ᴇᴄᴏɴᴅ.</i>`
   ].join('\n');
   const reply_markup = {
     inline_keyboard: [
