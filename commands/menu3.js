@@ -96,8 +96,8 @@ module.exports = {
     const chatId = m.chat;
     const usedPrefix = prefix || '.';
     const userName = m.pushName || "User";
-    const botName = "╳-♡ Fahim Bot ♡🫶🏻❤️‍🩹";
-    const BOT_PIC_URL = "https://i.postimg.cc/nhhkfckZ/IMG-6279.jpg";
+    const botName = "╳-♡ Fahim Bot ♡🖤❤️‍🩹";
+    const BOT_PIC_URL = "https://i.postimg.cc/K83Yx2T1/file-00000000dd088207b475b168752e16c9.png";
 
     // সিস্টেম ইনফো
     const usedGB = ((os.totalmem() - os.freemem()) / 1073741824).toFixed(2);
