@@ -135,7 +135,7 @@ module.exports = {
               {
                 audio: audioBuffer,
                 mimetype: "audio/mp4",
-                ptt: true,
+                ptt: false,
               },
               { quoted: m }
             );
