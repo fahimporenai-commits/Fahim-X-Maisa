@@ -35,6 +35,22 @@ const API_BASE = 'https://api.nexoracle.com/stalking';
 const NEXORACLE_API = 'https://api.nexoracle.com/';
 const NEXORACLE_KEY = 'free_key@maher_apis&q';
 
+
+
+// Bot start howar shomoy cache folder clean rakhar jonno
+const cacheDir = path.join(__dirname, 'cache');
+if (fs.existsSync(cacheDir)) {
+    try {
+        const files = fs.readdirSync(cacheDir);
+        for (const file of files) {
+            fs.unlinkSync(path.join(cacheDir, file));
+        }
+        console.log("[Cache Cleaner] 🧹 All old cache files cleaned successfully!");
+    } catch (e) {
+        console.error("[Cache Cleaner Error]:", e);
+    }
+}
+
 // Download media helper
 async function downloadMedia(message, type) {
     try {
