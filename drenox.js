@@ -1437,23 +1437,7 @@ if (antiGroupStatusCmd && typeof antiGroupStatusCmd.handleEvent === "function") 
     await antiGroupStatusCmd.handleEvent(bad, m);
 }
 
-// ─── Telegram Sticker Command Connection ───
-const tgStickerCmd = require('./commands/tgsticker');
 
-if (m.text && (
-    m.text.startsWith(".tgsticker") || 
-    m.text.startsWith(".tg") || 
-    m.text.startsWith(".telegramsticker")
-)) {
-    const prefix = m.text[0] && ['.', '/', '!'].includes(m.text[0]) ? m.text[0] : '.';
-    const args = m.text.trim().split(/ +/).slice(1);
-    
-    await tgStickerCmd.exec(bad, m, { 
-        args, 
-        prefix,
-        reply: (txt) => bad.sendMessage(m.chat, { text: txt }, { quoted: m })
-    });
-}
 
 
 if (getSetting(m.chat, "autoReact", false)) {
