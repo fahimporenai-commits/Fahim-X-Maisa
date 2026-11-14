@@ -4,7 +4,7 @@
   "description": "Fahim X Maisa WhatsApp and Telegram bot",
   "main": "index.js",
   "scripts": {
-    "start": "node --max-old-space-size=512 index.js",
+    "start": "node index.js",
     "dev": "nodemon index.js",
     "bot": "node bot.js",
     "pair": "node pair.js",
